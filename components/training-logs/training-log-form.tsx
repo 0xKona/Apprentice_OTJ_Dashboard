@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
-import { Plus } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 
 const client = generateClient<Schema>();
 
@@ -121,6 +121,11 @@ export function TrainingLogForm({
     }
   };
 
+  const setToday = () => {
+    const today = new Date().toISOString().split("T")[0];
+    setFormData({ ...formData, date: today });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -155,7 +160,18 @@ export function TrainingLogForm({
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="date">Date</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="date">Date</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={setToday}
+                >
+                  <Calendar className="mr-2 h-3 w-3" />
+                  Today
+                </Button>
+              </div>
               <Input
                 id="date"
                 type="date"
