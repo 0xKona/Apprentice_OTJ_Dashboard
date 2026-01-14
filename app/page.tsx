@@ -1,52 +1,65 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
-import "./../app/app.css";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Amplify } from "aws-amplify";
+import { getCurrentUser } from "aws-amplify/auth";
 import outputs from "@/amplify_outputs.json";
-import "@aws-amplify/ui-react/styles.css";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 Amplify.configure(outputs);
 
-const client = generateClient<Schema>();
-
-export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }
+export default function Home() {
+  const router = useRouter();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    listTodos();
-  }, []);
+    const checkAuth = async () => {
+      try {
+        await getCurrentUser();
+        router.push("/dashboard");
+      } catch {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
-
-  return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
-          Review next steps of this tutorial.
-        </a>
+  if (isCheckingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
       </div>
-    </main>
+    );
+  }
+  return (
+    <div className="relative flex min-h-screen flex-col items-center justify-center p-8">
+      <div className="fixed bottom-4 left-4">
+        <ThemeToggle />
+      </div>
+      <div className="w-full max-w-2xl space-y-8 text-center">
+        <div className="space-y-4">
+          <h1 className="text-5xl font-bold tracking-tight">OTJ Dashboard</h1>
+          <p className="text-xl text-muted-foreground">
+            Apprentice On-The-Job Training Management System
+          </p>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Manage and track apprentice training progress, log on-the-job hours,
+            and generate comprehensive reports.
+          </p>
+        </div>
+
+        <div className="flex gap-4 justify-center">
+          <Button asChild size="lg">
+            <Link href="/login">Sign In</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/signup">Create Account</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
