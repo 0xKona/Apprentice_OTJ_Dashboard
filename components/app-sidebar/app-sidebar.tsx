@@ -12,12 +12,29 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { Separator } from "@/components/ui/separator";
 
 const items = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Apprentices",
+    url: "/dashboard/apprentices",
+    icon: Users,
+  },
+  {
+    title: "Reports",
+    url: "/dashboard/reports",
+    icon: BarChart,
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/settings",
+    icon: Settings,
   },
 ];
 
@@ -44,7 +61,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ThemeToggle />
+        <div className="space-y-2 p-2">
+          <ThemeToggle />
+          <Separator />
+          <SignOutButton />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
