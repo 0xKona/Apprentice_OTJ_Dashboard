@@ -1,11 +1,11 @@
-import { Home, Settings, Users, BarChart } from "lucide-react";
+import { Home, Upload, FileText, Download, Settings } from "lucide-react";
+import Link from "next/link";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
@@ -22,14 +22,19 @@ const items = [
     icon: Home,
   },
   {
-    title: "Apprentices",
-    url: "/dashboard/apprentices",
-    icon: Users,
+    title: "Ingest Existing Logs",
+    url: "/dashboard/ingest",
+    icon: Upload,
   },
   {
-    title: "Reports",
-    url: "/dashboard/reports",
-    icon: BarChart,
+    title: "View / Add / Edit Logs",
+    url: "/dashboard/logs",
+    icon: FileText,
+  },
+  {
+    title: "Export Logs",
+    url: "/dashboard/export",
+    icon: Download,
   },
   {
     title: "Settings",
@@ -44,20 +49,18 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>OTJ Dashboard</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarMenu>
+            {items.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
