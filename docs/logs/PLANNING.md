@@ -1,10 +1,10 @@
-# LOG STORAGE PLANNING
+# LOG INGESTION PLANNING
 
-**_ MR #2 _**
+**_ MR #3 _**
 
 ## Log Storage Planning
 
-This document covers the plan for viewing / creating / updating and editing logs.
+This document covers the plan for ingesting logs from a inputted excel file.
 
 ### Log Types
 
@@ -20,10 +20,13 @@ This is the structure of a log, this does not include metadata, these are the va
 
 ### MR Scope
 
-This MR will cover manual viewing / creation / editing and deletion of logs in the dashboard/logs page.
+This MR will cover ingestion of logs from a excel file in the dashboard/ingest page
 
 After this MR users will be able to view on this page:
 
-- A searchable (by text and date) table of existing logs.
-- Each row of the above table will have a delete and edit button that requires confirming.
-- A add new log button should be available, this will open a form to manually input a new log.
+- A drag and drop interface allowing users to upload up to 20 excel files at a time
+- View the status of each logs ingestion as they are processed one by one
+
+### How to accomplish
+
+Please review the example_log.xlsx file in this directory. You will notice there is a lot of extra cells and data we won't need. we just need the rows of logs. I beleive this should be possible with the xlsx library. Files should be sent to a next.js api endpoint, which then processes the files. Alternatively we could use a amplify lambda / api gateway. Whichever will be more efficient and maintainable. Once parsed, each row (log entry) should be uploaded to the DB as a log and should appear in the dashboard/logs page. Users should be warned about any duplicates.
