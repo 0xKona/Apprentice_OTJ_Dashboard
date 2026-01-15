@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { Schema } from "@/amplify/data/resource";
-
-type TrainingLog = Schema["TrainingLog"]["type"];
+import type { TrainingLog } from "@/types/training-log";
 
 interface UseLogsFilterOptions {
   logs: TrainingLog[];

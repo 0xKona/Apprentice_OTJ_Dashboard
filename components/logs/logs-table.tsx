@@ -10,9 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import type { Schema } from "@/amplify/data/resource";
-
-type TrainingLog = Schema["TrainingLog"]["type"];
+import type { TrainingLog } from "@/types/training-log";
 
 interface LogsTableProps {
   logs: TrainingLog[];

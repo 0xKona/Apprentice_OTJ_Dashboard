@@ -8,9 +8,7 @@ import { LogsTable } from "@/components/logs/logs-table";
 import { LogsFilters } from "@/components/logs/logs-filters";
 import { LogsPagination } from "@/components/logs/logs-pagination";
 import { LogEditDialog } from "@/components/logs/log-edit-dialog";
-import type { Schema } from "@/amplify/data/resource";
-
-type TrainingLog = Schema["TrainingLog"]["type"];
+import type { TrainingLog } from "@/types/training-log";
 
 export default function LogsPage() {
   const { logs, isLoading, fetchLogs, updateLog, deleteLog } =

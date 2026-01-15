@@ -16,9 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Schema } from "@/amplify/data/resource";
-
-type TrainingLog = Schema["TrainingLog"]["type"];
+import type { TrainingLog } from "@/types/training-log";
 
 const logSchema = z.object({
   date: z.string().min(1, "Date is required"),

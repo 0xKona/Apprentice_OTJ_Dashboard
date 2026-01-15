@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import type { TrainingLog } from "@/types/training-log";
 
 const client = generateClient<Schema>();
-
-type TrainingLog = Schema["TrainingLog"]["type"];
 
 interface TrainingLogsState {
   logs: TrainingLog[];
