@@ -19,10 +19,11 @@ export function AuthGuard({ children, redirectTo = "/" }: AuthGuardProps) {
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Only redirect if loading is complete AND explicitly not authenticated
+    if (!isLoading && isAuthenticated === false) {
       router.push(redirectTo);
     }
-  }, [isAuthenticated, isLoading, router, redirectTo, pathname]);
+  }, [isAuthenticated, isLoading, router, redirectTo]);
 
   if (isLoading) {
     return (
