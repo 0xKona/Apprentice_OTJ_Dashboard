@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -45,23 +45,35 @@ export function LogEditDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
   } = useForm<LogFormData>({
     resolver: zodResolver(logSchema),
-    values: log
-      ? {
-          date: log.date,
-          startTime: log.startTime,
-          endTime: log.endTime,
-          activity: log.activity,
-          newLearning: log.newLearning,
-          impactOfLearning: log.impactOfLearning,
-        }
-      : undefined,
+    defaultValues: {
+      date: "",
+      startTime: "",
+      endTime: "",
+      activity: "",
+      newLearning: "",
+      impactOfLearning: "",
+    },
   });
+
+  // Reset form with log data when dialog opens or log changes
+  useEffect(() => {
+    if (log && open) {
+      reset({
+        date: log.date,
+        startTime: log.startTime,
+        endTime: log.endTime,
+        activity: log.activity,
+        newLearning: log.newLearning,
+        impactOfLearning: log.impactOfLearning,
+      });
+    }
+  }, [log, open, reset]);
 
   const onSubmit = async (data: LogFormData) => {
     if (!log) return;
@@ -97,11 +109,17 @@ export function LogEditDialog({
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                {...register("date")}
-                className={errors.date ? "border-red-500" : ""}
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="date"
+                    type="date"
+                    {...field}
+                    className={errors.date ? "border-red-500" : ""}
+                  />
+                )}
               />
               {errors.date && (
                 <p className="text-sm text-red-500">{errors.date.message}</p>
@@ -110,11 +128,17 @@ export function LogEditDialog({
 
             <div className="space-y-2">
               <Label htmlFor="startTime">Start Time</Label>
-              <Input
-                id="startTime"
-                type="time"
-                {...register("startTime")}
-                className={errors.startTime ? "border-red-500" : ""}
+              <Controller
+                name="startTime"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="startTime"
+                    type="time"
+                    {...field}
+                    className={errors.startTime ? "border-red-500" : ""}
+                  />
+                )}
               />
               {errors.startTime && (
                 <p className="text-sm text-red-500">
@@ -125,11 +149,17 @@ export function LogEditDialog({
 
             <div className="space-y-2">
               <Label htmlFor="endTime">End Time</Label>
-              <Input
-                id="endTime"
-                type="time"
-                {...register("endTime")}
-                className={errors.endTime ? "border-red-500" : ""}
+              <Controller
+                name="endTime"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="endTime"
+                    type="time"
+                    {...field}
+                    className={errors.endTime ? "border-red-500" : ""}
+                  />
+                )}
               />
               {errors.endTime && (
                 <p className="text-sm text-red-500">{errors.endTime.message}</p>
@@ -139,11 +169,17 @@ export function LogEditDialog({
 
           <div className="space-y-2">
             <Label htmlFor="activity">Activity</Label>
-            <Textarea
-              id="activity"
-              {...register("activity")}
-              className={errors.activity ? "border-red-500" : ""}
-              rows={3}
+            <Controller
+              name="activity"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="activity"
+                  {...field}
+                  className={errors.activity ? "border-red-500" : ""}
+                  rows={3}
+                />
+              )}
             />
             {errors.activity && (
               <p className="text-sm text-red-500">{errors.activity.message}</p>
@@ -152,11 +188,17 @@ export function LogEditDialog({
 
           <div className="space-y-2">
             <Label htmlFor="newLearning">New Learning</Label>
-            <Textarea
-              id="newLearning"
-              {...register("newLearning")}
-              className={errors.newLearning ? "border-red-500" : ""}
-              rows={3}
+            <Controller
+              name="newLearning"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="newLearning"
+                  {...field}
+                  className={errors.newLearning ? "border-red-500" : ""}
+                  rows={3}
+                />
+              )}
             />
             {errors.newLearning && (
               <p className="text-sm text-red-500">
@@ -167,11 +209,17 @@ export function LogEditDialog({
 
           <div className="space-y-2">
             <Label htmlFor="impactOfLearning">Impact of Learning</Label>
-            <Textarea
-              id="impactOfLearning"
-              {...register("impactOfLearning")}
-              className={errors.impactOfLearning ? "border-red-500" : ""}
-              rows={3}
+            <Controller
+              name="impactOfLearning"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="impactOfLearning"
+                  {...field}
+                  className={errors.impactOfLearning ? "border-red-500" : ""}
+                  rows={3}
+                />
+              )}
             />
             {errors.impactOfLearning && (
               <p className="text-sm text-red-500">
