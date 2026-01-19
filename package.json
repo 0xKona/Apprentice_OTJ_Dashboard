@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sandbox:run": "npx ampx sandbox"
+    "sandbox:run": "npx ampx sandbox --identifier otjobberDEV"
   },
   "dependencies": {
     "@aws-amplify/adapter-nextjs": "^1.6.12",
