@@ -16,7 +16,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Separator } from "@/components/ui/separator";
 
-const items = [
+const navItems = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -52,12 +52,12 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarMenu>
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
+            {navItems.map((navItem) => (
+              <SidebarMenuItem key={navItem.title}>
                 <SidebarMenuButton asChild>
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
+                  <Link href={navItem.url}>
+                    <navItem.icon />
+                    <span>{navItem.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

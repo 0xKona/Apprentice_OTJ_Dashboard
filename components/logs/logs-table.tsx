@@ -65,13 +65,13 @@ export function LogsTable({
               <TableCell>{log.date}</TableCell>
               <TableCell>{log.startTime}</TableCell>
               <TableCell>{log.endTime}</TableCell>
-              <TableCell className="max-w-[200px] truncate">
+              <TableCell className="max-w-50 truncate">
                 {log.activity}
               </TableCell>
-              <TableCell className="max-w-[200px] truncate">
+              <TableCell className="max-w-50 truncate">
                 {log.newLearning}
               </TableCell>
-              <TableCell className="max-w-[200px] truncate">
+              <TableCell className="max-w-50 truncate">
                 {log.impactOfLearning}
               </TableCell>
               <TableCell className="text-right">
