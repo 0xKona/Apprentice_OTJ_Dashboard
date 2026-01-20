@@ -17,9 +17,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AiSuggestionButton } from "@/components/ui/ai-suggestion-button";
+import { AiComparisonDialog } from "@/components/ui/ai-comparison-dialog";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import type { TrainingLog } from "@/types/training-log";
+import { useAIGeneration } from "@/lib/ai-client";
 import { Plus, Calendar } from "lucide-react";
 
 const client = generateClient<Schema>();
@@ -52,10 +55,31 @@ export function TrainingLogForm({
 }: TrainingLogFormProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false);
+  const [currentField, setCurrentField] = useState<keyof LogFormData | null>(
+    null
+  );
+  const [originalText, setOriginalText] = useState("");
+  const [suggestedText, setSuggestedText] = useState("");
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? onOpenChange! : setInternalOpen;
+
+  const [{ data, isLoading, hasError }, GenerateImprovement] = useAIGeneration(
+    "GenerateImprovement"
+  );
+
+  // Watch for AI data and open comparison dialog when ready
+  useEffect(() => {
+    if (data && currentField) {
+      console.log("AI data received:", data);
+      // Extract the improved text from the response
+      const improvedText = data.improvedLog || "";
+      setSuggestedText(improvedText);
+      setComparisonDialogOpen(true);
+    }
+  }, [data, currentField]);
 
   const {
     control,
@@ -63,6 +87,7 @@ export function TrainingLogForm({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<LogFormData>({
     resolver: zodResolver(logSchema),
     defaultValues: {
@@ -74,6 +99,9 @@ export function TrainingLogForm({
       impactOfLearning: "",
     },
   });
+
+  // Watch all form values for AI context
+  const formValues = watch();
 
   // Reset form with log data when dialog opens or log changes
   useEffect(() => {
@@ -106,6 +134,37 @@ export function TrainingLogForm({
     const endTotalMinutes = endHours * 60 + endMinutes;
     const durationMinutes = endTotalMinutes - startTotalMinutes;
     return durationMinutes / 60;
+  };
+
+  const handleAiImprove = async (fieldName: keyof LogFormData) => {
+    const currentText = formValues[fieldName];
+    setOriginalText(currentText);
+    setCurrentField(fieldName);
+
+    // Call GenerateImprovement - the result will arrive via useEffect watching data
+    await GenerateImprovement({
+      logSectionToImprove: fieldName,
+      log: JSON.stringify(formValues),
+    });
+  };
+
+  const handleAcceptSuggestion = (finalText: string) => {
+    if (currentField) {
+      setValue(currentField, finalText);
+    }
+  };
+
+  const handleRejectSuggestion = () => {
+    // Do nothing - keep original text
+  };
+
+  const fieldLabels: Record<keyof LogFormData, string> = {
+    date: "Date",
+    startTime: "Start Time",
+    endTime: "End Time",
+    activity: "Activity",
+    newLearning: "New Learning",
+    impactOfLearning: "Impact of Learning",
   };
 
   const onSubmit = async (data: LogFormData) => {
@@ -296,7 +355,14 @@ export function TrainingLogForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="impactOfLearning">Impact of Learning</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="impactOfLearning">Impact of Learning</Label>
+              <AiSuggestionButton
+                onClick={() => handleAiImprove("impactOfLearning")}
+                isLoading={isLoading}
+                disabled={!formValues.activity && !formValues.newLearning}
+              />
+            </div>
             <Controller
               name="impactOfLearning"
               control={control}
@@ -313,6 +379,11 @@ export function TrainingLogForm({
             {errors.impactOfLearning && (
               <p className="text-sm text-red-500">
                 {errors.impactOfLearning.message}
+              </p>
+            )}
+            {hasError && (
+              <p className="text-sm text-orange-500">
+                Failed to generate AI suggestion. Please try again.
               </p>
             )}
           </div>
@@ -332,6 +403,17 @@ export function TrainingLogForm({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* AI Comparison Dialog */}
+      <AiComparisonDialog
+        open={comparisonDialogOpen}
+        onOpenChange={setComparisonDialogOpen}
+        fieldLabel={currentField ? fieldLabels[currentField] : ""}
+        originalText={originalText}
+        suggestedText={suggestedText}
+        onAccept={handleAcceptSuggestion}
+        onReject={handleRejectSuggestion}
+      />
     </Dialog>
   );
 }

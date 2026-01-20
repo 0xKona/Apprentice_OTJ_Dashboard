@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource.js';
 import { data } from './data/resource.js';
 import { Tags } from 'aws-cdk-lib';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 const backend = defineBackend({
   auth,
@@ -41,3 +42,10 @@ Tags.of(backend.auth.resources.userPool).add('DataClassification', 'confidential
 Tags.of(backend.data.resources.tables['TrainingLog']).add('ResourceType', 'dynamodb-table');
 Tags.of(backend.data.resources.tables['TrainingLog']).add('DataClassification', 'internal');
 Tags.of(backend.data.resources.tables['TrainingLog']).add('DataRetention', '7-years'); // Apprenticeship records
+
+// Add necessary IAM policies to roles for Bedrock access
+Object.values(backend.data.resources.roles).forEach(role => {
+  role.addManagedPolicy(
+    iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonBedrockFullAccess')
+  );
+});

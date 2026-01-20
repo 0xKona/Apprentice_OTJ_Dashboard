@@ -15,6 +15,26 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.owner().to(["read", "create", "update", "delete"]),
     ]),
+
+      
+  GenerateImprovement: a.generation({
+    // aiModel: a.ai.model('Claude 3.5 Haiku'),
+    aiModel: {
+      resourcePath: 'eu.anthropic.claude-3-haiku-20240307-v1:0'
+    },
+    systemPrompt: `You are a assistant that improves UK Apprentice on the job hours logs. You will be provided with a log, along with which section to improve.
+    return the improved log as json`,
+  })
+  .arguments({
+    logSectionToImprove: a.string(),
+    log: a.json()
+  })
+  .returns(
+    a.customType({
+      improvedLog: a.json()
+    })
+  )
+  .authorization((allow) => allow.authenticated()),
 });
 
 export type Schema = ClientSchema<typeof schema>;
