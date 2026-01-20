@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import { useTrainingLogsStore } from "@/lib/stores/training-logs-store";
 import { useLogsFilter } from "@/hooks/use-logs-filter";
-import { TrainingLogForm } from "@/components/training-logs/training-log-form";
+import { TrainingLogForm } from "@/components/logs/log-form";
 import { LogsTable } from "@/components/logs/logs-table";
 import { LogsFilters } from "@/components/logs/logs-filters";
 import { LogsPagination } from "@/components/logs/logs-pagination";
-import { LogEditDialog } from "@/components/logs/log-edit-dialog";
 import type { TrainingLog } from "@/types/training-log";
 
 export default function LogsPage() {
-  const { logs, isLoading, fetchLogs, updateLog, deleteLog } =
-    useTrainingLogsStore();
+  const { logs, isLoading, fetchLogs, deleteLog } = useTrainingLogsStore();
   const [selectedLog, setSelectedLog] = useState<TrainingLog | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -41,18 +39,16 @@ export default function LogsPage() {
     setIsEditDialogOpen(true);
   };
 
-  const handleSave = async (id: string, data: Partial<TrainingLog>) => {
-    await updateLog(id, data);
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this log?")) {
       await deleteLog(id);
     }
   };
 
-  const handleLogCreated = () => {
+  const handleLogSaved = () => {
     fetchLogs();
+    setIsEditDialogOpen(false);
+    setSelectedLog(null);
   };
 
   return (
@@ -64,7 +60,7 @@ export default function LogsPage() {
             Track and manage your off-the-job training activities
           </p>
         </div>
-        <TrainingLogForm onSuccess={handleLogCreated} />
+        <TrainingLogForm onSuccess={handleLogSaved} />
       </div>
 
       <LogsFilters
@@ -93,11 +89,11 @@ export default function LogsPage() {
         onPreviousPage={goToPreviousPage}
       />
 
-      <LogEditDialog
+      <TrainingLogForm
         log={selectedLog}
         open={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        onSave={handleSave}
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={handleLogSaved}
       />
     </div>
   );
