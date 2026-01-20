@@ -18,10 +18,7 @@ const schema = a.schema({
 
       
   GenerateImprovement: a.generation({
-    // aiModel: a.ai.model('Claude 3.5 Haiku'),
-    aiModel: {
-      resourcePath: 'eu.anthropic.claude-3-haiku-20240307-v1:0'
-    },
+    aiModel: a.ai.model('Claude 3 Haiku'),
     systemPrompt: `You are a assistant that improves UK Apprentice on the job hours logs. You will be provided with a log, along with which section to improve.
     return the improved log as json`,
   })
