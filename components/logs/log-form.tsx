@@ -74,8 +74,9 @@ export function TrainingLogForm({
   useEffect(() => {
     if (data && currentField) {
       console.log("AI data received:", data);
-      // Extract the improved text from the response
-      const improvedText = data.improvedLog || "";
+      const improvedLog = JSON.parse(data.improvedLog as string);
+      const improvedText = improvedLog[currentField] || "";
+      console.log("Improved Text: ", improvedText);
       setSuggestedText(improvedText);
       setComparisonDialogOpen(true);
     }

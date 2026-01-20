@@ -16,7 +16,6 @@ const schema = a.schema({
       allow.owner().to(["read", "create", "update", "delete"]),
     ]),
 
-      
   GenerateImprovement: a.generation({
     aiModel: a.ai.model('Claude 3 Haiku'),
     systemPrompt: `You are a assistant that improves UK Apprentice on the job hours logs. You will be provided with a log, along with which section to improve.
@@ -37,6 +36,7 @@ const schema = a.schema({
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
+  name: "OTJobber",
   schema,
   authorizationModes: {
     defaultAuthorizationMode: "userPool",
