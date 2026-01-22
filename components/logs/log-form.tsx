@@ -18,12 +18,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiSuggestionButton } from "@/components/ui/ai-suggestion-button";
-import { AiComparisonDialog } from "@/components/ui/ai-comparison-dialog";
+import { AiComparisonDialog } from "@/components/ai/ai-comparison-dialog";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import type { TrainingLog } from "@/types/training-log";
 import { useAIGeneration } from "@/lib/ai-client";
 import { Plus, Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 const client = generateClient<Schema>();
 
@@ -73,14 +74,23 @@ export function TrainingLogForm({
   // Watch for AI data and open comparison dialog when ready
   useEffect(() => {
     if (data && currentField) {
-      console.log("AI data received:", data);
-      const improvedLog = JSON.parse(data.improvedLog as string);
-      const improvedText = improvedLog[currentField] || "";
-      console.log("Improved Text: ", improvedText);
+      const improvedText = typeof data === "string" ? data.trim() : "";
+
+      if (!improvedText || improvedText.length < 10) {
+        toast.error("AI generated invalid response. Please try again.");
+        setCurrentField(null);
+        return;
+      }
+
       setSuggestedText(improvedText);
       setComparisonDialogOpen(true);
     }
-  }, [data, currentField]);
+
+    if (hasError) {
+      toast.error("Failed to generate improvement. Please try again.");
+      setCurrentField(null);
+    }
+  }, [data, currentField, hasError]);
 
   const {
     control,
@@ -139,14 +149,27 @@ export function TrainingLogForm({
 
   const handleAiImprove = async (fieldName: keyof LogFormData) => {
     const currentText = formValues[fieldName];
+
+    if (!formValues.activity || formValues.activity.trim().length === 0) {
+      toast.error(
+        "Please fill in the Activity field first to provide context."
+      );
+      return;
+    }
+
     setOriginalText(currentText);
     setCurrentField(fieldName);
 
-    // Call GenerateImprovement - the result will arrive via useEffect watching data
-    await GenerateImprovement({
-      logSectionToImprove: fieldName,
-      log: JSON.stringify(formValues),
-    });
+    try {
+      await GenerateImprovement({
+        currentFieldContent: currentText || "No content provided",
+        fieldName: fieldName,
+        fullLogContext: JSON.stringify(formValues),
+      });
+    } catch (error) {
+      toast.error("Failed to generate improvement. Please try again.");
+      setCurrentField(null);
+    }
   };
 
   const handleAcceptSuggestion = (finalText: string) => {

@@ -1,5 +1,23 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
+const prompt = 
+`You are an expert assistant that improves UK Apprentice training log entries.
+
+Your task is to rewrite the provided text with enhanced professional language while maintaining the apprentice's voice.
+
+Some inputs may contain no existing text for the field, it may be empty, in this case you should generate the field based on the rest of the full log
+
+IMPORTANT:
+- Return ONLY the improved text (2-4 complete sentences or around 75-100 words)
+- Maintain the original meaning and intent
+- Use professional language suitable for UK apprenticeship documentation
+- Focus on skills gained and workplace relevance
+- Do NOT include any labels, formatting, or explanatory text
+
+Example:
+Input: learned about aws ec2 today
+Output: This training has equipped me with essential cloud infrastructure skills that directly support my role in the DevOps team. Understanding EC2 instance management enables me to deploy and maintain production systems more effectively.`;
+
 const schema = a.schema({
   TrainingLog: a
     .model({
@@ -17,18 +35,16 @@ const schema = a.schema({
     ]),
 
   GenerateImprovement: a.generation({
-    aiModel: a.ai.model('Claude 3 Haiku'),
-    systemPrompt: `You are a assistant that improves UK Apprentice on the job hours logs. You will be provided with a log, along with which section to improve.
-    return the improved log as json`,
+    aiModel: a.ai.model('Amazon Nova Lite'),
+    systemPrompt: prompt,
   })
   .arguments({
-    logSectionToImprove: a.string(),
-    log: a.json()
+    currentFieldContent: a.string(),  // The actual text to improve
+    fieldName: a.string(),            // For context: "impactOfLearning", etc.
+    fullLogContext: a.json()          // The complete log for context
   })
   .returns(
-    a.customType({
-      improvedLog: a.json()
-    })
+    a.string()
   )
   .authorization((allow) => allow.authenticated()),
 });
