@@ -18,6 +18,18 @@ Example:
 Input: learned about aws ec2 today
 Output: This training has equipped me with essential cloud infrastructure skills that directly support my role in the DevOps team. Understanding EC2 instance management enables me to deploy and maintain production systems more effectively.`;
 
+/**
+ * Sets a limit on AI usages per day to avoid bankruptcy
+ * @returns 
+ */
+ const getDefaultLimit = (): number => {
+    // Check if we're in a sandbox environment
+    console.log('Branch: ', process.env.AWS_BRANCH)
+    const isSandbox = !process.env.AWS_BRANCH;
+    const limit = isSandbox ? 1000 : 25;
+    return limit;
+  };
+
 const schema = a.schema({
   TrainingLog: a
     .model({
@@ -39,7 +51,7 @@ const schema = a.schema({
       userId: a.string().required(),
       date: a.date().required(), // YYYY-MM-DD format
       count: a.integer().required().default(0),
-      dailyLimit: a.integer().required().default(25),
+      dailyLimit: a.integer().default(getDefaultLimit()),
       lastUpdated: a.datetime().required(),
     })
     .identifier(["userId", "date"]) // Composite key for userId + date

@@ -49,7 +49,7 @@ export function useAiRateLimit() {
           userId: user.userId,
           date: today,
           count: 0,
-          dailyLimit: 25,
+          // Daily limit is set by the DB
           lastUpdated: new Date().toISOString(),
         });
         
@@ -64,13 +64,15 @@ export function useAiRateLimit() {
         throw new Error("Failed to fetch or create usage record");
       }
 
-      const canUse = currentUsage.count < currentUsage.dailyLimit;
-      const remaining = Math.max(0, currentUsage.dailyLimit - currentUsage.count);
+      // Handle null dailyLimit with fallback
+      const dailyLimit = currentUsage.dailyLimit ?? 1000;
+      const canUse = currentUsage.count < dailyLimit;
+      const remaining = Math.max(0, dailyLimit - currentUsage.count);
 
       setStatus({
         canUseAi: canUse,
         remainingUses: remaining,
-        dailyLimit: currentUsage.dailyLimit,
+        dailyLimit: dailyLimit,
         isLoading: false,
         error: null,
       });
@@ -106,8 +108,11 @@ export function useAiRateLimit() {
         throw new Error("Usage record not found");
       }
 
+      // Handle null dailyLimit with fallback
+      const dailyLimit = currentUsage.dailyLimit ?? 1000;
+      
       // Check if under limit
-      if (currentUsage.count >= currentUsage.dailyLimit) {
+      if (currentUsage.count >= dailyLimit) {
         setStatus((prev) => ({
           ...prev,
           canUseAi: false,
@@ -125,11 +130,12 @@ export function useAiRateLimit() {
       });
 
       if (updatedUsage) {
-        const remaining = Math.max(0, updatedUsage.dailyLimit - updatedUsage.count);
+        const updatedDailyLimit = updatedUsage.dailyLimit ?? 1000;
+        const remaining = Math.max(0, updatedDailyLimit - updatedUsage.count);
         setStatus({
-          canUseAi: updatedUsage.count < updatedUsage.dailyLimit,
+          canUseAi: updatedUsage.count < updatedDailyLimit,
           remainingUses: remaining,
-          dailyLimit: updatedUsage.dailyLimit,
+          dailyLimit: updatedDailyLimit,
           isLoading: false,
           error: null,
         });

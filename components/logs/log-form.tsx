@@ -77,7 +77,7 @@ export function TrainingLogForm({
     remainingUses,
     dailyLimit,
     isLoading: rateLimitLoading,
-    error: rateLimitError,
+    error: aiRateLimitError,
     incrementUsage,
   } = useAiRateLimit();
 
@@ -101,6 +101,13 @@ export function TrainingLogForm({
       setCurrentField(null);
     }
   }, [data, currentField, hasError]);
+
+  // Watch for AI rate limit errors
+  useEffect(() => {
+    if (aiRateLimitError) {
+      toast.error("AI rate limit error: " + aiRateLimitError);
+    }
+  }, [aiRateLimitError]);
 
   const {
     control,

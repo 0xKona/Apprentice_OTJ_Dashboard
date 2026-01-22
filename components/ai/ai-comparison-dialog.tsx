@@ -63,7 +63,7 @@ export function AiComparisonDialog({
           {/* Original Text */}
           <div className="space-y-2">
             <Label className="text-muted-foreground">Original</Label>
-            <div className="rounded-md border bg-muted/50 p-3 min-h-[150px] max-h-[400px] overflow-y-auto">
+            <div className="rounded-md border bg-muted/50 p-3 min-h-37.5 max-h-100 overflow-y-auto">
               <p className="text-sm whitespace-pre-wrap">
                 {originalText || "(empty)"}
               </p>
@@ -77,7 +77,7 @@ export function AiComparisonDialog({
               id="aiSuggestion"
               value={editedText}
               onChange={(e) => setEditedText(e.target.value)}
-              className="min-h-[150px] max-h-[400px]"
+              className="min-h-37.5 max-h-100"
               rows={8}
             />
           </div>
