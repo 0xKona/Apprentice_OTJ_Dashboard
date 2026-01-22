@@ -17,10 +17,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AiSuggestionButton } from "@/components/ui/ai-suggestion-button";
+import { AiComparisonDialog } from "@/components/ai/ai-comparison-dialog";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import type { TrainingLog } from "@/types/training-log";
+import { useAIGeneration } from "@/lib/ai-client";
+import { useAiRateLimit } from "@/hooks/use-ai-rate-limit";
 import { Plus, Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 const client = generateClient<Schema>();
 
@@ -52,10 +57,57 @@ export function TrainingLogForm({
 }: TrainingLogFormProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false);
+  const [currentField, setCurrentField] = useState<keyof LogFormData | null>(
+    null
+  );
+  const [originalText, setOriginalText] = useState("");
+  const [suggestedText, setSuggestedText] = useState("");
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? onOpenChange! : setInternalOpen;
+
+  const [{ data, isLoading, hasError }, GenerateImprovement] = useAIGeneration(
+    "GenerateImprovement"
+  );
+
+  const {
+    canUseAi,
+    remainingUses,
+    dailyLimit,
+    isLoading: rateLimitLoading,
+    error: aiRateLimitError,
+    incrementUsage,
+  } = useAiRateLimit();
+
+  // Watch for AI data and open comparison dialog when ready
+  useEffect(() => {
+    if (data && currentField) {
+      const improvedText = typeof data === "string" ? data.trim() : "";
+
+      if (!improvedText || improvedText.length < 10) {
+        toast.error("AI generated invalid response. Please try again.");
+        setCurrentField(null);
+        return;
+      }
+
+      setSuggestedText(improvedText);
+      setComparisonDialogOpen(true);
+    }
+
+    if (hasError) {
+      toast.error("Failed to generate improvement. Please try again.");
+      setCurrentField(null);
+    }
+  }, [data, currentField, hasError]);
+
+  // Watch for AI rate limit errors
+  useEffect(() => {
+    if (aiRateLimitError) {
+      toast.error("AI rate limit error: " + aiRateLimitError);
+    }
+  }, [aiRateLimitError]);
 
   const {
     control,
@@ -63,6 +115,7 @@ export function TrainingLogForm({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<LogFormData>({
     resolver: zodResolver(logSchema),
     defaultValues: {
@@ -74,6 +127,9 @@ export function TrainingLogForm({
       impactOfLearning: "",
     },
   });
+
+  // Watch all form values for AI context
+  const formValues = watch();
 
   // Reset form with log data when dialog opens or log changes
   useEffect(() => {
@@ -106,6 +162,68 @@ export function TrainingLogForm({
     const endTotalMinutes = endHours * 60 + endMinutes;
     const durationMinutes = endTotalMinutes - startTotalMinutes;
     return durationMinutes / 60;
+  };
+
+  const handleAiImprove = async (fieldName: keyof LogFormData) => {
+    const currentText = formValues[fieldName];
+
+    // Check rate limit before proceeding
+    if (!canUseAi) {
+      toast.error(
+        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`
+      );
+      return;
+    }
+
+    if (!formValues.activity || formValues.activity.trim().length === 0) {
+      toast.error(
+        "Please fill in the Activity field first to provide context."
+      );
+      return;
+    }
+
+    setOriginalText(currentText);
+    setCurrentField(fieldName);
+
+    // Increment usage counter
+    const allowed = await incrementUsage();
+    if (!allowed) {
+      toast.error(
+        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`
+      );
+      setCurrentField(null);
+      return;
+    }
+
+    try {
+      await GenerateImprovement({
+        currentFieldContent: currentText || "No content provided",
+        fieldName: fieldName,
+        fullLogContext: JSON.stringify(formValues),
+      });
+    } catch (error) {
+      toast.error("Failed to generate improvement. Please try again.");
+      setCurrentField(null);
+    }
+  };
+
+  const handleAcceptSuggestion = (finalText: string) => {
+    if (currentField) {
+      setValue(currentField, finalText);
+    }
+  };
+
+  const handleRejectSuggestion = () => {
+    // Do nothing - keep original text
+  };
+
+  const fieldLabels: Record<keyof LogFormData, string> = {
+    date: "Date",
+    startTime: "Start Time",
+    endTime: "End Time",
+    activity: "Activity",
+    newLearning: "New Learning",
+    impactOfLearning: "Impact of Learning",
   };
 
   const onSubmit = async (data: LogFormData) => {
@@ -296,7 +414,25 @@ export function TrainingLogForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="impactOfLearning">Impact of Learning</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="impactOfLearning">Impact of Learning</Label>
+              <div className="flex items-center gap-2">
+                {!rateLimitLoading && (
+                  <span className="text-xs text-muted-foreground">
+                    {remainingUses}/{dailyLimit} AI uses left today
+                  </span>
+                )}
+                <AiSuggestionButton
+                  onClick={() => handleAiImprove("impactOfLearning")}
+                  isLoading={isLoading}
+                  disabled={
+                    !canUseAi ||
+                    rateLimitLoading ||
+                    (!formValues.activity && !formValues.newLearning)
+                  }
+                />
+              </div>
+            </div>
             <Controller
               name="impactOfLearning"
               control={control}
@@ -313,6 +449,11 @@ export function TrainingLogForm({
             {errors.impactOfLearning && (
               <p className="text-sm text-red-500">
                 {errors.impactOfLearning.message}
+              </p>
+            )}
+            {hasError && (
+              <p className="text-sm text-orange-500">
+                Failed to generate AI suggestion. Please try again.
               </p>
             )}
           </div>
@@ -332,6 +473,17 @@ export function TrainingLogForm({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* AI Comparison Dialog */}
+      <AiComparisonDialog
+        open={comparisonDialogOpen}
+        onOpenChange={setComparisonDialogOpen}
+        fieldLabel={currentField ? fieldLabels[currentField] : ""}
+        originalText={originalText}
+        suggestedText={suggestedText}
+        onAccept={handleAcceptSuggestion}
+        onReject={handleRejectSuggestion}
+      />
     </Dialog>
   );
 }

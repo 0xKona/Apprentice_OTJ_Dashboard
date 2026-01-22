@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
 interface AuthGuardProps {
@@ -12,7 +12,6 @@ interface AuthGuardProps {
 export function AuthGuard({ children, redirectTo = "/" }: AuthGuardProps) {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     checkAuth();
