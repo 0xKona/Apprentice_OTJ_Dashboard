@@ -1,4 +1,4 @@
-import { Home, Upload, FileText, Download, Settings } from "lucide-react";
+import { Home, Upload, FileText, Download, Settings, Logs } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -47,7 +47,20 @@ const navItems = [
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader>OTJ Dashboard</SidebarHeader>
+      <SidebarHeader>
+        <div className="flex items-center gap-3 p-2">
+          {/* <Logs className="h-8 w-8" /> */}
+          <div>
+            <h1 className="flex items-center gap-2 text-xl font-bold">
+              <Logs className="h-6 w-6" />
+              OTJobber
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Apprenticeship Learning Log Management Platform
+            </p>
+          </div>
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Pages</SidebarGroupLabel>
