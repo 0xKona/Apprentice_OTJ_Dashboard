@@ -34,6 +34,19 @@ const schema = a.schema({
       allow.owner().to(["read", "create", "update", "delete"]),
     ]),
 
+  AiUsage: a
+    .model({
+      userId: a.string().required(),
+      date: a.date().required(), // YYYY-MM-DD format
+      count: a.integer().required().default(0),
+      dailyLimit: a.integer().required().default(25),
+      lastUpdated: a.datetime().required(),
+    })
+    .identifier(["userId", "date"]) // Composite key for userId + date
+    .authorization((allow) => [
+      allow.owner().to(["read", "create", "update"]),
+    ]),
+
   GenerateImprovement: a.generation({
     aiModel: a.ai.model('Amazon Nova Lite'),
     systemPrompt: sysPrompt,

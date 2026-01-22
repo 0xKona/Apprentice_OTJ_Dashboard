@@ -23,6 +23,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import type { TrainingLog } from "@/types/training-log";
 import { useAIGeneration } from "@/lib/ai-client";
+import { useAiRateLimit } from "@/hooks/use-ai-rate-limit";
 import { Plus, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
@@ -70,6 +71,15 @@ export function TrainingLogForm({
   const [{ data, isLoading, hasError }, GenerateImprovement] = useAIGeneration(
     "GenerateImprovement"
   );
+
+  const {
+    canUseAi,
+    remainingUses,
+    dailyLimit,
+    isLoading: rateLimitLoading,
+    error: rateLimitError,
+    incrementUsage,
+  } = useAiRateLimit();
 
   // Watch for AI data and open comparison dialog when ready
   useEffect(() => {
@@ -150,6 +160,14 @@ export function TrainingLogForm({
   const handleAiImprove = async (fieldName: keyof LogFormData) => {
     const currentText = formValues[fieldName];
 
+    // Check rate limit before proceeding
+    if (!canUseAi) {
+      toast.error(
+        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`
+      );
+      return;
+    }
+
     if (!formValues.activity || formValues.activity.trim().length === 0) {
       toast.error(
         "Please fill in the Activity field first to provide context."
@@ -159,6 +177,16 @@ export function TrainingLogForm({
 
     setOriginalText(currentText);
     setCurrentField(fieldName);
+
+    // Increment usage counter
+    const allowed = await incrementUsage();
+    if (!allowed) {
+      toast.error(
+        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`
+      );
+      setCurrentField(null);
+      return;
+    }
 
     try {
       await GenerateImprovement({
@@ -381,11 +409,22 @@ export function TrainingLogForm({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="impactOfLearning">Impact of Learning</Label>
-              <AiSuggestionButton
-                onClick={() => handleAiImprove("impactOfLearning")}
-                isLoading={isLoading}
-                disabled={!formValues.activity && !formValues.newLearning}
-              />
+              <div className="flex items-center gap-2">
+                {!rateLimitLoading && (
+                  <span className="text-xs text-muted-foreground">
+                    {remainingUses}/{dailyLimit} AI uses left today
+                  </span>
+                )}
+                <AiSuggestionButton
+                  onClick={() => handleAiImprove("impactOfLearning")}
+                  isLoading={isLoading}
+                  disabled={
+                    !canUseAi ||
+                    rateLimitLoading ||
+                    (!formValues.activity && !formValues.newLearning)
+                  }
+                />
+              </div>
             </div>
             <Controller
               name="impactOfLearning"

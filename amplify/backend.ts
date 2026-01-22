@@ -43,6 +43,10 @@ Tags.of(backend.data.resources.tables['TrainingLog']).add('ResourceType', 'dynam
 Tags.of(backend.data.resources.tables['TrainingLog']).add('DataClassification', 'internal');
 Tags.of(backend.data.resources.tables['TrainingLog']).add('DataRetention', '7-years'); // Apprenticeship records
 
+Tags.of(backend.data.resources.tables['AiUsage']).add('ResourceType', 'dynamodb-table');
+Tags.of(backend.data.resources.tables['AiUsage']).add('DataClassification', 'operational');
+Tags.of(backend.data.resources.tables['AiUsage']).add('DataRetention', '90-days'); // Keep for audit/analytics
+
 // Add necessary IAM policies to roles for Bedrock access
 Object.values(backend.data.resources.roles).forEach(role => {
   role.addManagedPolicy(
