@@ -1,6 +1,8 @@
 "use client";
 
-import { getCurrentUser } from "aws-amplify/auth";
+import { getCurrentUser, signOut } from "aws-amplify/auth";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { toast } from "sonner";
 
 export async function isAuthenticated() {
   try {
@@ -10,3 +12,17 @@ export async function isAuthenticated() {
     return false;
   }
 }
+
+/**
+ * Function to handle user sign out, take a useRouter variable as input for redirects
+ * @param router 
+ */
+export const handleSignOut = async (router: AppRouterInstance) => {
+    try {
+      await signOut();
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error(`Error signing out: ${error}`)
+    }
+  };
