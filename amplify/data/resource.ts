@@ -1,6 +1,6 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
-const prompt = 
+const sysPrompt = 
 `You are an expert assistant that improves UK Apprentice training log entries.
 
 Your task is to rewrite the provided text with enhanced professional language while maintaining the apprentice's voice.
@@ -36,7 +36,7 @@ const schema = a.schema({
 
   GenerateImprovement: a.generation({
     aiModel: a.ai.model('Amazon Nova Lite'),
-    systemPrompt: prompt,
+    systemPrompt: sysPrompt,
   })
   .arguments({
     currentFieldContent: a.string(),  // The actual text to improve
