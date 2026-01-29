@@ -1,44 +1,48 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { AuthUser, signOut } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "aws-amplify/auth";
-import { Hub } from "aws-amplify/utils";
+import { toast } from "sonner";
+
+interface UserAttributes {
+  email?: string;
+  sub?: string;
+  [key: string]: string | undefined;
+}
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { authStatus, user } = useAuthenticator((context) => [
+    context.authStatus,
+    context.user,
+  ]);
 
-  const checkAuth = async () => {
+  const isAuthenticated = authStatus === "authenticated";
+  const isLoading = authStatus === "configuring";
+  const userAttributes = ((user as any)?.attributes as UserAttributes) || null;
+
+  async function handleSignOut() {
     try {
-      await getCurrentUser();
-      setIsAuthenticated(true);
-    } catch {
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
+      await signOut();
+    } catch (error) {
+      const errorMsg = `Error signing out: ${error}`
+      console.error(errorMsg);
+      toast.error(errorMsg);
+    }
+
+    try {
+      router.replace('/');
+      router.refresh();
+    } catch (error) {
+      const errorMsg = `Error redirecting after sign out: ${error}`
+      console.error(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
-  useEffect(() => {
-    checkAuth();
-
-    const hubListenerCancelToken = Hub.listen("auth", ({ payload }) => {
-      switch (payload.event) {
-        case "signedIn":
-          setIsAuthenticated(true);
-          router.push("/dashboard");
-          break;
-        case "signedOut":
-          setIsAuthenticated(false);
-          router.push("/");
-          break;
-      }
-    });
-
-    return () => hubListenerCancelToken();
-  }, [router]);
-
-  return { isAuthenticated, isLoading };
+  return {
+    isAuthenticated,
+    isLoading,
+    userAttributes,
+    signout: handleSignOut,
+  };
 }

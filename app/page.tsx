@@ -1,37 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Amplify } from "aws-amplify";
-import { getCurrentUser } from "aws-amplify/auth";
-import outputs from "@/amplify_outputs.json";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Home() {
-  const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await getCurrentUser();
-        router.push("/dashboard");
-      } catch {
-        setIsCheckingAuth(false);
-      }
-    };
-    checkAuth();
-  }, [router]);
-
-  if (isCheckingAuth) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-8">
       <div className="fixed bottom-4 left-4">
@@ -50,12 +26,20 @@ export default function Home() {
         </div>
 
         <div className="flex gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link href="/signin">Sign In</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/signup">Create Account</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button asChild size="lg">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild size="lg">
+                <Link href="/signin">Sign In</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/signup">Create Account</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

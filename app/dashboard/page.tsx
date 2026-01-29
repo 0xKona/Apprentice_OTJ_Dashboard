@@ -3,13 +3,12 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { authStatus } = useAuthenticator((context) => [context.authStatus]);
 
-  const isLoading = authStatus === "configuring";
-  const isAuthenticated = authStatus === "authenticated";
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
