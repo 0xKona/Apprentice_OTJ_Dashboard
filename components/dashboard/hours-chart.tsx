@@ -87,7 +87,7 @@ export function HoursChart({ logs }: HoursChartProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <div style={{ minWidth: Math.max(chartData.length * 60, 800) }}>
+          <div style={{ minWidth: Math.max(chartData.length * 60, 800), height: 350 }}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
