@@ -53,22 +53,10 @@ export function useExportLogs({ onError }: UseExportLogsOptions = {}) {
       return;
     }
 
-    // Create tab-separated values (TSV) format for Excel compatibility
-    const rows = logs.map((log) => [
-      log.date,
-      log.startTime,
-      log.endTime,
-      log.durationHours.toString(),
-      log.activity,
-      log.newLearning,
-      log.impactOfLearning,
-    ]);
-
-    // Combine rows into TSV format
-    const tsv = rows.map((row) => row.join("\t")).join("\n");
-
     try {
-      await navigator.clipboard.writeText(tsv);
+      const { logsToTSV, copyToClipboard: copy } = await import("@/lib/export-utils");
+      const tsv = logsToTSV(logs);
+      await copy(tsv);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
