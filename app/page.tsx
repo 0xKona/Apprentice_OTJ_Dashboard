@@ -12,6 +12,24 @@ import { Footer } from "@/components/footer";
 export default function Home() {
   const { isAuthenticated } = useAuth();
 
+  const cards = [
+    {
+      icon: Clock,
+      title: "Track Hours",
+      description: "Log and monitor your on-the-job training hours with ease",
+    },
+    {
+      icon: FileText,
+      title: "Document Learning",
+      description: "Record activities, new skills, and learning impact",
+    },
+    {
+      icon: TrendingUp,
+      title: "Track Progress",
+      description: "Visualize your growth with charts and insights",
+    },
+  ];
+
   return (
     <div className="relative min-h-screen bg-background">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10 pointer-events-none" />
@@ -87,42 +105,21 @@ export default function Home() {
             )}
           </div>
 
+          {/* HERE */}
           <div className="grid md:grid-cols-3 gap-6 pt-16">
-            <Card>
-              <CardContent className="p-6 space-y-3 flex flex-col items-center">
-                <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Clock className="size-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold">Track Hours</h3>
-                <p className="text-sm text-muted-foreground">
-                  Log and monitor your on-the-job training hours with ease
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-3 flex flex-col items-center">
-                <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="size-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold">Document Learning</h3>
-                <p className="text-sm text-muted-foreground">
-                  Record activities, new skills, and learning impact
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-3 flex flex-col items-center">
-                <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="size-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold">Track Progress</h3>
-                <p className="text-sm text-muted-foreground">
-                  Visualize your growth with charts and insights
-                </p>
-              </CardContent>
-            </Card>
+            {cards.map((card) => (
+              <Card>
+                <CardContent className="p-6 space-y-3 flex flex-col items-center">
+                  <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <card.icon className="size-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {card.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </main>
