@@ -20,7 +20,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="px-1 py-3 space-y-1">
+        <Link href="/" className="block px-1">
           <Image
             src="/logo_full.svg"
             alt="OTJobber"
@@ -31,7 +31,7 @@ export function AppSidebar() {
           <p className="text-xs text-muted-foreground pl-1">
             On-the-job learning log platform
           </p>
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
