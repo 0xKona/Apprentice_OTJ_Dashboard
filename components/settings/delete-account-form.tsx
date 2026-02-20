@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2 } from "lucide-react";
+import { ExportDataSection } from "./export-data-section";
 
 export function DeleteAccountForm() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export function DeleteAccountForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+        <ExportDataSection />
         <Alert variant="destructive">
           <AlertDescription>
             This action cannot be undone. All your training logs and data will be permanently deleted.
