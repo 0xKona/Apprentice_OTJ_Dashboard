@@ -1,14 +1,8 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Settings } from "lucide-react";
+import { ChangePasswordForm } from "@/components/settings/change-password-form";
+import { DeleteAccountForm } from "@/components/settings/delete-account-form";
 
 export default function SettingsPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,30 +20,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Settings</h1>
         <p className="text-muted-foreground">
-          Configure application preferences and account settings
+          Manage your account and security settings
         </p>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Application Settings
-          </CardTitle>
-          <CardDescription>
-            Manage your account and application preferences
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Settings interface will be implemented here.
-          </p>
-        </CardContent>
-      </Card>
+      <ChangePasswordForm />
+      <DeleteAccountForm />
     </div>
   );
 }
