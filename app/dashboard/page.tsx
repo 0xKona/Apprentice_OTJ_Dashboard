@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrainingLogsStore } from "@/lib/stores/training-logs-store";
 import { HoursChart } from "@/components/dashboard/hours-chart";
 import { TotalHours } from "@/components/dashboard/total-hours";
 import { RecentLogs } from "@/components/dashboard/recent-logs";
+import { AverageHours } from "@/components/dashboard/average-hours";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -39,14 +39,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to your OTJ Dashboard</p>
+        <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Welcome to your OTJ Dashboard</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[250px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <TotalHours logs={logs} />
         <RecentLogs logs={logs} />
+        <AverageHours logs={logs} />
       </div>
       <HoursChart logs={logs} />
     </div>

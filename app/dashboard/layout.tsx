@@ -13,11 +13,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-sidebar">
       <AppSidebar />
-      <main className="w-full">
-        <SidebarTrigger />
-        {children}
+      <main className="flex-1 p-2">
+        <div className="h-full rounded-xl border bg-background p-6 overflow-auto">
+          <SidebarTrigger className="mb-4" />
+          {children}
+        </div>
       </main>
     </SidebarProvider>
   );
