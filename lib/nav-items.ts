@@ -4,8 +4,6 @@ import {
   FileText,
   Download,
   Settings,
-  Logs,
-  LayoutTemplate,
 } from "lucide-react";
 
 export interface NavItem {
@@ -34,11 +32,6 @@ export const navItems: NavItem[] = [
     title: "Export Logs",
     url: "/dashboard/export",
     icon: Download,
-  },
-  {
-    title: "Templates",
-    url: "/dashboard/templates",
-    icon: LayoutTemplate,
   },
   {
     title: "Settings",

@@ -1,5 +1,5 @@
-import { Logs } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -20,16 +20,17 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-3 p-2">
-          <div>
-            <h1 className="flex items-center gap-2 text-xl font-bold">
-              <Logs className="h-6 w-6" />
-              OTJobber
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Apprenticeship Learning Log Management Platform
-            </p>
-          </div>
+        <div className="px-1 py-3 space-y-1">
+          <Image
+            src="/logo_full.svg"
+            alt="OTJobber"
+            width={220}
+            height={60}
+            priority
+          />
+          <p className="text-xs text-muted-foreground pl-1">
+            On-the-job learning log platform
+          </p>
         </div>
       </SidebarHeader>
       <SidebarContent>
