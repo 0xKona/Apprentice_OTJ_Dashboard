@@ -2,7 +2,9 @@
   "name": "otjobber_v2",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["backend"],
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,7 +12,9 @@
     "lint": "eslint",
     "sandbox:start": "npx ampx sandbox",
     "sandbox:delete": "npx ampx sandbox delete",
-    "backend:deploy": "cd backend && npx cdk deploy --all --context environment=dev"
+    "backend:deploy:dev": "cd backend && npx cdk deploy --all --context environment=dev",
+    "backend:deploy:staging": "cd backend && npx cdk deploy --all --context environment=staging",
+    "backend:deploy:prod": "cd backend && npx cdk deploy --all --context environment=prod"
   },
   "dependencies": {
     "@aws-amplify/adapter-nextjs": "^1.7.1",
