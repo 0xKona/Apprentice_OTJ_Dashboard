@@ -4,6 +4,8 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as appsync from 'aws-cdk-lib/aws-appsync';
 import { Construct } from 'constructs';
 import { Environment, validateEnvironment, removalPolicy } from '../config';
+import { TrainingLogResolvers } from '../constructs/training-log-resolvers';
+import { AiUsageResolvers } from '../constructs/ai-usage-resolvers';
 import * as path from 'path';
 
 export interface DataStackProps extends cdk.StackProps {
@@ -52,57 +54,15 @@ export class DataStack extends cdk.Stack {
     });
 
     const ddbSource = this.api.addDynamoDbDataSource('DataTableSource', this.dataTable);
-    const resolversDir = path.join(__dirname, '../graphql/resolvers');
 
-    // TrainingLog resolvers
-    ddbSource.createResolver('CreateTrainingLog', {
-      typeName: 'Mutation',
-      fieldName: 'createTrainingLog',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'training-log/create.js')),
+    new TrainingLogResolvers(this, 'TrainingLogResolvers', {
+      api: this.api,
+      dataSource: ddbSource,
     });
 
-    ddbSource.createResolver('GetTrainingLog', {
-      typeName: 'Query',
-      fieldName: 'getTrainingLog',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'training-log/get.js')),
-    });
-
-    ddbSource.createResolver('ListTrainingLogs', {
-      typeName: 'Query',
-      fieldName: 'listTrainingLogs',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'training-log/list.js')),
-    });
-
-    ddbSource.createResolver('UpdateTrainingLog', {
-      typeName: 'Mutation',
-      fieldName: 'updateTrainingLog',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'training-log/update.js')),
-    });
-
-    ddbSource.createResolver('DeleteTrainingLog', {
-      typeName: 'Mutation',
-      fieldName: 'deleteTrainingLog',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'training-log/delete.js')),
-    });
-
-    // AiUsage resolvers
-    ddbSource.createResolver('GetAiUsage', {
-      typeName: 'Query',
-      fieldName: 'getAiUsage',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'ai-usage/get.js')),
-    });
-
-    ddbSource.createResolver('ListAiUsages', {
-      typeName: 'Query',
-      fieldName: 'listAiUsages',
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
-      code: appsync.Code.fromAsset(path.join(resolversDir, 'ai-usage/list.js')),
+    new AiUsageResolvers(this, 'AiUsageResolvers', {
+      api: this.api,
+      dataSource: ddbSource,
     });
 
     new cdk.CfnOutput(this, 'ApiUrl', { value: this.api.graphqlUrl });
