@@ -4,7 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { execSync } from 'child_process';
-import { BackendStack } from '../lib/stacks/backend-stack';
+import { AuthStack } from '../lib/stacks/auth-stack';
 
 const BACKEND_ROOT = path.resolve(__dirname, '..');
 
@@ -27,7 +27,7 @@ describe('Property 1: Isolation', () => {
 describe('Property 3: Synthesis Validity', () => {
   it.each(['dev', 'staging', 'prod'] as const)('produces valid CloudFormation for %s', (env) => {
     const app = new cdk.App();
-    const stack = new BackendStack(app, `Test-${env}`, { environment: env });
+    const stack = new AuthStack(app, `Test-${env}`, { environment: env });
     const template = Template.fromStack(stack);
     const json = template.toJSON();
     // Valid CF template synthesized without errors
@@ -39,7 +39,7 @@ describe('Property 3: Synthesis Validity', () => {
 describe('Property 4: Tag Consistency', () => {
   it.each(['dev', 'staging', 'prod'] as const)('tags propagate to child resources for %s', (env) => {
     const app = new cdk.App();
-    const stack = new BackendStack(app, `Tag-Test-${env}`, { environment: env });
+    const stack = new AuthStack(app, `Tag-Test-${env}`, { environment: env });
     cdk.Tags.of(app).add('Application', 'OTJobber');
     cdk.Tags.of(app).add('Environment', env);
     cdk.Tags.of(app).add('ManagedBy', 'CDK');
@@ -60,10 +60,10 @@ describe('Property 4: Tag Consistency', () => {
 });
 
 describe('Property 5: Stack Naming Convention', () => {
-  it.each(['dev', 'staging', 'prod'] as const)('stack ID matches OTJobber-Backend-%s', (env) => {
+  it.each(['dev', 'staging', 'prod'] as const)('stack ID matches OTJobber-Auth-%s', (env) => {
     const app = new cdk.App();
-    const stackId = `OTJobber-Backend-${env}`;
-    new BackendStack(app, stackId, { environment: env });
+    const stackId = `OTJobber-Auth-${env}`;
+    new AuthStack(app, stackId, { environment: env });
     const assembly = app.synth();
     expect(assembly.getStackByName(stackId)).toBeDefined();
   });
