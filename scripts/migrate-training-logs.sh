@@ -104,13 +104,20 @@ BATCH="[]"
 for i in $(seq 0 $((SCAN_COUNT - 1))); do
   ITEM=$(echo "$ALL_ITEMS" | jq ".[$i]")
 
-  # Extract fields
-  USER_ID=$(echo "$ITEM" | jq -r '.userId.S')
-  DATE=$(echo "$ITEM" | jq -r '.date.S')
-  ID=$(echo "$ITEM" | jq -r '.id.S')
+  # Extract fields — use owner field since userId may be empty in Amplify data
+  USER_ID=$(echo "$ITEM" | jq -r '.userId.S // empty')
+  DATE=$(echo "$ITEM" | jq -r '.date.S // empty')
+  ID=$(echo "$ITEM" | jq -r '.id.S // empty')
+
+  # Fall back to owner field if userId is empty
+  if [[ -z "$USER_ID" ]]; then
+    OWNER=$(echo "$ITEM" | jq -r '.owner.S // empty')
+    # Owner format is "sub::sub" — extract the first part
+    USER_ID="${OWNER%%::*}"
+  fi
 
   if [[ -z "$USER_ID" || -z "$DATE" || -z "$ID" ]]; then
-    echo "WARNING: Skipping item $i - missing userId, date, or id"
+    echo "WARNING: Skipping item $i - missing userId/owner, date, or id"
     ERRORS=$((ERRORS + 1))
     continue
   fi
@@ -121,12 +128,14 @@ for i in $(seq 0 $((SCAN_COUNT - 1))); do
     --arg sk "LOG#${DATE}#${ID}" \
     --arg gsi1pk "LOG#${ID}" \
     --arg gsi1sk "USER#${USER_ID}" \
+    --arg uid "$USER_ID" \
     '. + {
       "PK": {"S": $pk},
       "SK": {"S": $sk},
       "GSI1PK": {"S": $gsi1pk},
-      "GSI1SK": {"S": $gsi1sk}
-    }')
+      "GSI1SK": {"S": $gsi1sk},
+      "userId": {"S": $uid}
+    } | del(.__typename) | del(.owner)')
 
   # Add to batch
   PUT_REQUEST=$(jq -n --argjson item "$NEW_ITEM" '{"PutRequest": {"Item": $item}}')
