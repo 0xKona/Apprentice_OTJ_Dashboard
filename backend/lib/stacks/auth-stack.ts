@@ -20,7 +20,7 @@ export class AuthStack extends cdk.Stack {
 
     cdk.Tags.of(this).add('Stack', id);
 
-    // User Pool - Task 1.2
+    // User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: `OTJobber-UserPool-${props.environment}`,
       selfSignUpEnabled: true,
@@ -40,7 +40,7 @@ export class AuthStack extends cdk.Stack {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
     });
 
-    // App Client - Task 1.3
+    // App Client
     this.userPoolClient = this.userPool.addClient('WebClient', {
       userPoolClientName: `OTJobber-WebClient-${props.environment}`,
       generateSecret: false,
@@ -53,7 +53,7 @@ export class AuthStack extends cdk.Stack {
       refreshTokenValidity: cdk.Duration.days(30),
     });
 
-    // Outputs - Task 1.4
+    // Outputs
     new cdk.CfnOutput(this, 'UserPoolId', { value: this.userPool.userPoolId });
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: this.userPoolClient.userPoolClientId });
   }
