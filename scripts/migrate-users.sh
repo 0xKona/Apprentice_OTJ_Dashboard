@@ -107,16 +107,39 @@ echo "[3/6] Generating CSV file..."
 CSV_FILE=$(mktemp /tmp/cognito-import-XXXXXXXX.csv)
 echo "$CSV_HEADER" > "$CSV_FILE"
 
+# Parse header into array to know column count and positions
+IFS=',' read -ra HEADERS <<< "$CSV_HEADER"
+HEADER_COUNT=${#HEADERS[@]}
+
 echo "$USERS" | jq -c '.[]' | while read -r user; do
-  EMAIL=$(echo "$user" | jq -r '.Attributes[] | select(.Name=="email") | .Value // empty')
-  EMAIL_VERIFIED=$(echo "$user" | jq -r '.Attributes[] | select(.Name=="email_verified") | .Value // "false"')
+  EMAIL=$(echo "$user" | jq -r '[.Attributes[] | select(.Name=="email") | .Value] | first // empty')
+  EMAIL_VERIFIED=$(echo "$user" | jq -r '[.Attributes[] | select(.Name=="email_verified") | .Value] | first // "false"')
+  USERNAME=$(echo "$user" | jq -r '.Username // empty')
 
   if [[ -z "$EMAIL" ]]; then
     continue
   fi
 
-  # Format: cognito:username,cognito:mfa_enabled,email,email_verified,phone_number,phone_number_verified
-  echo "${EMAIL},false,${EMAIL},${EMAIL_VERIFIED},,false" >> "$CSV_FILE"
+  # Build row matching header columns
+  ROW=""
+  for i in "${!HEADERS[@]}"; do
+    COL="${HEADERS[$i]}"
+    VAL=""
+    case "$COL" in
+      email) VAL="$EMAIL" ;;
+      email_verified) VAL="$EMAIL_VERIFIED" ;;
+      cognito:mfa_enabled) VAL="false" ;;
+      cognito:username) VAL="$EMAIL" ;;
+      phone_number_verified) VAL="false" ;;
+      *) VAL="" ;;
+    esac
+    if [[ $i -eq 0 ]]; then
+      ROW="$VAL"
+    else
+      ROW="${ROW},${VAL}"
+    fi
+  done
+  echo "$ROW" >> "$CSV_FILE"
 done
 
 LINES=$(($(wc -l < "$CSV_FILE") - 1))
