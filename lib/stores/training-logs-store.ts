@@ -1,24 +1,25 @@
 import { create } from "zustand";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import { client } from "@/lib/api-client";
+import { listTrainingLogs } from "@/lib/graphql/queries";
+import {
+  createTrainingLog,
+  updateTrainingLog,
+  deleteTrainingLog,
+} from "@/lib/graphql/mutations";
 import type { TrainingLog } from "@/types/training-log";
-
-const client = generateClient<Schema>();
 
 interface TrainingLogsState {
   logs: TrainingLog[];
   isLoading: boolean;
   error: string | null;
-  
-  // Actions
   fetchLogs: () => Promise<void>;
-  createLog: (log: Omit<TrainingLog, "id" | "createdAt" | "updatedAt" | "owner">) => Promise<void>;
+  createLog: (log: Omit<TrainingLog, "id" | "createdAt" | "updatedAt" | "userId">) => Promise<void>;
   updateLog: (id: string, updates: Partial<TrainingLog>) => Promise<void>;
-  deleteLog: (id: string) => Promise<void>;
+  deleteLog: (id: string, date: string) => Promise<void>;
   clearError: () => void;
 }
 
-export const useTrainingLogsStore = create<TrainingLogsState>((set, get) => ({
+export const useTrainingLogsStore = create<TrainingLogsState>((set) => ({
   logs: [],
   isLoading: false,
   error: null,
@@ -27,28 +28,18 @@ export const useTrainingLogsStore = create<TrainingLogsState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const allData: TrainingLog[] = [];
-      let hasMore = true;
-      let nextToken: string | null | undefined = undefined;
+      let nextToken: string | null = null;
 
-      // Fetch all pages
-      while (hasMore) {
-        const response: {
-          data: TrainingLog[];
-          nextToken: string | null | undefined;
-        } = await client.models.TrainingLog.list({
-          limit: 1000,
-          nextToken: nextToken,
-          authMode: "userPool",
-        }) as any;
-        
-        allData.push(...response.data);
-        nextToken = response.nextToken;
-        hasMore = !!response.nextToken;
-      }
+      do {
+        const response: any = await client.graphql({
+          query: listTrainingLogs,
+          variables: { limit: 1000, nextToken },
+        });
+        allData.push(...response.data.listTrainingLogs.items);
+        nextToken = response.data.listTrainingLogs.nextToken;
+      } while (nextToken);
 
-      // Sort by date descending
       allData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
       set({ logs: allData, isLoading: false });
     } catch (error) {
       set({
@@ -61,19 +52,14 @@ export const useTrainingLogsStore = create<TrainingLogsState>((set, get) => ({
   createLog: async (log) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await client.models.TrainingLog.create(
-        {
-          ...log,
-          userId: "",
-        },
-        {
-          authMode: "userPool",
-        }
-      );
+      const response: any = await client.graphql({
+        query: createTrainingLog,
+        variables: { input: log },
+      });
 
-      if (response.data) {
+      if (response.data.createTrainingLog) {
         set((state) => ({
-          logs: [response.data as TrainingLog, ...state.logs],
+          logs: [response.data.createTrainingLog, ...state.logs],
           isLoading: false,
         }));
       }
@@ -89,20 +75,15 @@ export const useTrainingLogsStore = create<TrainingLogsState>((set, get) => ({
   updateLog: async (id, updates) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await client.models.TrainingLog.update(
-        {
-          id,
-          ...updates,
-        },
-        {
-          authMode: "userPool",
-        }
-      );
+      const response: any = await client.graphql({
+        query: updateTrainingLog,
+        variables: { input: { id, ...updates } },
+      });
 
-      if (response.data) {
+      if (response.data.updateTrainingLog) {
         set((state) => ({
           logs: state.logs.map((log) =>
-            log.id === id ? (response.data as TrainingLog) : log
+            log.id === id ? response.data.updateTrainingLog : log
           ),
           isLoading: false,
         }));
@@ -116,15 +97,13 @@ export const useTrainingLogsStore = create<TrainingLogsState>((set, get) => ({
     }
   },
 
-  deleteLog: async (id) => {
+  deleteLog: async (id, date) => {
     set({ isLoading: true, error: null });
     try {
-      await client.models.TrainingLog.delete(
-        { id },
-        {
-          authMode: "userPool",
-        }
-      );
+      await client.graphql({
+        query: deleteTrainingLog,
+        variables: { id, date },
+      });
 
       set((state) => ({
         logs: state.logs.filter((log) => log.id !== id),

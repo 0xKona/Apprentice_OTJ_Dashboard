@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import { client } from "@/lib/api-client";
+import { createTrainingLog } from "@/lib/graphql/mutations";
 import { parseExcelFile, type TrainingLogData } from "@/lib/excel-parser";
-import type { FileWithLogs, ParsedLog } from "@/types/ingest";
-
-const client = generateClient<Schema>();
+import type { FileWithLogs } from "@/types/ingest";
 
 interface UseIngestLogsOptions {
   onError?: (message: string) => void;
@@ -78,10 +76,7 @@ export function useIngestLogs({ onError }: UseIngestLogsOptions = {}) {
     setParsedFiles((prev) =>
       prev.map((file, idx) =>
         idx === fileIndex
-          ? {
-              ...file,
-              logs: file.logs.filter((log) => log.id !== logId),
-            }
+          ? { ...file, logs: file.logs.filter((log) => log.id !== logId) }
           : file
       )
     );
@@ -116,7 +111,6 @@ export function useIngestLogs({ onError }: UseIngestLogsOptions = {}) {
         const log = file.logs[logIdx];
         if (log.status !== "pending") continue;
 
-        // Update status to uploading
         setParsedFiles((prev) =>
           prev.map((f, fIdx) =>
             fIdx === fileIdx
@@ -131,23 +125,21 @@ export function useIngestLogs({ onError }: UseIngestLogsOptions = {}) {
         );
 
         try {
-          await client.models.TrainingLog.create(
-            {
-              date: log.date,
-              startTime: log.startTime,
-              endTime: log.endTime,
-              durationHours: log.durationHours,
-              activity: log.activity,
-              newLearning: log.newLearning,
-              impactOfLearning: log.impactOfLearning,
-              userId: "",
+          await client.graphql({
+            query: createTrainingLog,
+            variables: {
+              input: {
+                date: log.date,
+                startTime: log.startTime,
+                endTime: log.endTime,
+                durationHours: log.durationHours,
+                activity: log.activity,
+                newLearning: log.newLearning,
+                impactOfLearning: log.impactOfLearning,
+              },
             },
-            {
-              authMode: "userPool",
-            }
-          );
+          });
 
-          // Update status to uploaded
           setParsedFiles((prev) =>
             prev.map((f, fIdx) =>
               fIdx === fileIdx
@@ -161,7 +153,6 @@ export function useIngestLogs({ onError }: UseIngestLogsOptions = {}) {
             )
           );
         } catch (error) {
-          // Update status to error
           setParsedFiles((prev) =>
             prev.map((f, fIdx) =>
               fIdx === fileIdx

@@ -19,15 +19,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiSuggestionButton } from "@/components/ui/ai-suggestion-button";
 import { AiComparisonDialog } from "@/components/ai/ai-comparison-dialog";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import { client } from "@/lib/api-client";
+import {
+  createTrainingLog,
+  updateTrainingLog,
+  generateImprovement,
+} from "@/lib/graphql/mutations";
 import type { TrainingLog } from "@/types/training-log";
-import { useAIGeneration } from "@/lib/ai-client";
 import { useAiRateLimit } from "@/hooks/use-ai-rate-limit";
 import { Plus, Calendar } from "lucide-react";
 import { toast } from "sonner";
-
-const client = generateClient<Schema>();
 
 const logSchema = z.object({
   date: z.string().min(1, "Date is required"),
@@ -57,10 +58,9 @@ export function TrainingLogForm({
 }: TrainingLogFormProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false);
-  const [currentField, setCurrentField] = useState<keyof LogFormData | null>(
-    null,
-  );
+  const [currentField, setCurrentField] = useState<keyof LogFormData | null>(null);
   const [originalText, setOriginalText] = useState("");
   const [suggestedText, setSuggestedText] = useState("");
 
@@ -68,41 +68,16 @@ export function TrainingLogForm({
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? onOpenChange! : setInternalOpen;
 
-  const [{ data, isLoading, hasError }, GenerateImprovement] = useAIGeneration(
-    "GenerateImprovement",
-  );
-
   const {
     canUseAi,
     remainingUses,
     dailyLimit,
     isLoading: rateLimitLoading,
     error: aiRateLimitError,
-    incrementUsage,
+    setLimitReached,
+    refresh: refreshRateLimit,
   } = useAiRateLimit();
 
-  // Watch for AI data and open comparison dialog when ready
-  useEffect(() => {
-    if (data && currentField) {
-      const improvedText = typeof data === "string" ? data.trim() : "";
-
-      if (!improvedText || improvedText.length < 10) {
-        toast.error("AI generated invalid response. Please try again.");
-        setCurrentField(null);
-        return;
-      }
-
-      setSuggestedText(improvedText);
-      setComparisonDialogOpen(true);
-    }
-
-    if (hasError) {
-      toast.error("Failed to generate improvement. Please try again.");
-      setCurrentField(null);
-    }
-  }, [data, currentField, hasError]);
-
-  // Watch for AI rate limit errors
   useEffect(() => {
     if (aiRateLimitError) {
       toast.error("AI rate limit error: " + aiRateLimitError);
@@ -128,10 +103,8 @@ export function TrainingLogForm({
     },
   });
 
-  // Watch all form values for AI context
   const formValues = watch();
 
-  // Reset form with log data when dialog opens or log changes
   useEffect(() => {
     if (log && open) {
       reset({
@@ -158,52 +131,58 @@ export function TrainingLogForm({
     if (!start || !end) return 0;
     const [startHours, startMinutes] = start.split(":").map(Number);
     const [endHours, endMinutes] = end.split(":").map(Number);
-    const startTotalMinutes = startHours * 60 + startMinutes;
-    const endTotalMinutes = endHours * 60 + endMinutes;
-    const durationMinutes = endTotalMinutes - startTotalMinutes;
-    return durationMinutes / 60;
+    return (endHours * 60 + endMinutes - (startHours * 60 + startMinutes)) / 60;
   };
 
   const handleAiImprove = async (fieldName: keyof LogFormData) => {
     const currentText = formValues[fieldName];
 
-    // Check rate limit before proceeding
     if (!canUseAi) {
-      toast.error(
-        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`,
-      );
+      toast.error(`Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`);
       return;
     }
 
     if (!formValues.activity || formValues.activity.trim().length === 0) {
-      toast.error(
-        "Please fill in the Activity field first to provide context.",
-      );
+      toast.error("Please fill in the Activity field first to provide context.");
       return;
     }
 
     setOriginalText(currentText);
     setCurrentField(fieldName);
-
-    // Increment usage counter
-    const allowed = await incrementUsage();
-    if (!allowed) {
-      toast.error(
-        `Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`,
-      );
-      setCurrentField(null);
-      return;
-    }
+    setIsGenerating(true);
 
     try {
-      await GenerateImprovement({
-        currentFieldContent: currentText || "No content provided",
-        fieldName: fieldName,
-        fullLogContext: JSON.stringify(formValues),
+      const response: any = await client.graphql({
+        query: generateImprovement,
+        variables: {
+          currentFieldContent: currentText || "No content provided",
+          fieldName,
+          fullLogContext: JSON.stringify(formValues),
+        },
       });
-    } catch (error) {
-      toast.error("Failed to generate improvement. Please try again.");
+
+      const improvedText = (response.data.generateImprovement || "").trim();
+
+      if (!improvedText || improvedText.length < 10) {
+        toast.error("AI generated invalid response. Please try again.");
+        setCurrentField(null);
+        return;
+      }
+
+      setSuggestedText(improvedText);
+      setComparisonDialogOpen(true);
+      refreshRateLimit();
+    } catch (error: any) {
+      const message = error?.errors?.[0]?.message || error?.message || "";
+      if (message.includes("Daily AI usage limit reached")) {
+        setLimitReached();
+        toast.error(`Daily AI limit reached (${dailyLimit} uses). Resets tomorrow.`);
+      } else {
+        toast.error("Failed to generate improvement. Please try again.");
+      }
       setCurrentField(null);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -214,7 +193,7 @@ export function TrainingLogForm({
   };
 
   const handleRejectSuggestion = () => {
-    // Do nothing - keep original text
+    // Keep original text
   };
 
   const fieldLabels: Record<keyof LogFormData, string> = {
@@ -239,18 +218,14 @@ export function TrainingLogForm({
       }
 
       if (log?.id) {
-        // Update existing log
-        await client.models.TrainingLog.update({
-          id: log.id,
-          ...data,
-          durationHours,
+        await client.graphql({
+          query: updateTrainingLog,
+          variables: { input: { id: log.id, ...data, durationHours } },
         });
       } else {
-        // Create new log
-        await client.models.TrainingLog.create({
-          ...data,
-          durationHours,
-          userId: "",
+        await client.graphql({
+          query: createTrainingLog,
+          variables: { input: { ...data, durationHours } },
         });
       }
 
@@ -424,7 +399,7 @@ export function TrainingLogForm({
                 )}
                 <AiSuggestionButton
                   onClick={() => handleAiImprove("impactOfLearning")}
-                  isLoading={isLoading}
+                  isLoading={isGenerating}
                   disabled={
                     !canUseAi ||
                     rateLimitLoading ||
@@ -451,11 +426,6 @@ export function TrainingLogForm({
                 {errors.impactOfLearning.message}
               </p>
             )}
-            {hasError && (
-              <p className="text-sm text-orange-500">
-                Failed to generate AI suggestion. Please try again.
-              </p>
-            )}
           </div>
 
           <DialogFooter>
@@ -474,7 +444,6 @@ export function TrainingLogForm({
         </form>
       </DialogContent>
 
-      {/* AI Comparison Dialog */}
       <AiComparisonDialog
         open={comparisonDialogOpen}
         onOpenChange={setComparisonDialogOpen}

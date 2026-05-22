@@ -15,7 +15,7 @@ import type { TrainingLog } from "@/types/training-log";
 interface LogsTableProps {
   logs: TrainingLog[];
   onEdit: (log: TrainingLog) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, date: string) => void;
   isLoading?: boolean;
 }
 
@@ -86,7 +86,7 @@ export function LogsTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onDelete(log.id)}
+                    onClick={() => onDelete(log.id, log.date)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

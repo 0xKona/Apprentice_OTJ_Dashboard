@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import { client } from "@/lib/api-client";
+import { listTrainingLogs } from "@/lib/graphql/queries";
 import type { TrainingLog } from "@/types/training-log";
-
-const client = generateClient<Schema>();
 
 interface UseExportLogsOptions {
   onError?: (message: string) => void;
@@ -24,21 +22,17 @@ export function useExportLogs({ onError }: UseExportLogsOptions = {}) {
 
     setIsLoading(true);
     try {
-      const { data } = await client.models.TrainingLog.list({
-        authMode: "userPool",
+      const response: any = await client.graphql({
+        query: listTrainingLogs,
+        variables: { limit: 1000 },
       });
 
-      if (data) {
-        // Filter logs by date range
-        const filtered = data.filter((log) => {
-          const logDate = log.date;
-          return logDate >= startDate && logDate <= endDate;
-        });
+      const data: TrainingLog[] = response.data.listTrainingLogs.items;
+      const filtered = data
+        .filter((log) => log.date >= startDate && log.date <= endDate)
+        .sort((a, b) => a.date.localeCompare(b.date));
 
-        // Sort by date ascending
-        filtered.sort((a, b) => a.date.localeCompare(b.date));
-        setLogs(filtered);
-      }
+      setLogs(filtered);
     } catch (error) {
       console.error("Failed to fetch logs:", error);
       onError?.("Failed to fetch logs");

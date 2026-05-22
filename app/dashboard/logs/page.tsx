@@ -39,9 +39,9 @@ export default function LogsPage() {
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, date: string) => {
     if (confirm("Are you sure you want to delete this log?")) {
-      await deleteLog(id);
+      await deleteLog(id, date);
     }
   };
 

@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import { client } from "@/lib/api-client";
+import { listTrainingLogs } from "@/lib/graphql/queries";
 import type { TrainingLog } from "@/types/training-log";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Copy, Download, Check } from "lucide-react";
 import { logsToTSV, logsToCSV, copyToClipboard, downloadCSV } from "@/lib/export-utils";
-
-const client = generateClient<Schema>();
 
 export function ExportDataSection() {
   const [logs, setLogs] = useState<TrainingLog[]>([]);
@@ -23,12 +21,12 @@ export function ExportDataSection() {
 
   const fetchAllLogs = async () => {
     try {
-      const { data } = await client.models.TrainingLog.list({
-        authMode: "userPool",
+      const response: any = await client.graphql({
+        query: listTrainingLogs,
+        variables: { limit: 1000 },
       });
-      if (data) {
-        setLogs(data.sort((a, b) => a.date.localeCompare(b.date)));
-      }
+      const data: TrainingLog[] = response.data.listTrainingLogs.items;
+      setLogs(data.sort((a, b) => a.date.localeCompare(b.date)));
     } catch (err) {
       setError("Failed to load logs");
     } finally {
