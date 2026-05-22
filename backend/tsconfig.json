@@ -4,7 +4,7 @@
     "module": "node16",
     "moduleResolution": "node16",
     "lib": ["ES2022"],
-    "types": ["node"],
+    "types": ["node", "jest"],
     "declaration": true,
     "strict": true,
     "noEmit": false,
@@ -12,6 +12,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["bin/**/*.ts", "lib/**/*.ts", "test/**/*.ts"],
+  "include": ["bin/**/*.ts", "lib/**/*.ts"],
   "exclude": ["node_modules", "cdk.out"]
 }
