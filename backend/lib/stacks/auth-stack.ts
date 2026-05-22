@@ -1,9 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { Construct } from 'constructs';
+import { Environment, validateEnvironment } from '../config';
 
 export interface AuthStackProps extends cdk.StackProps {
-  environment: 'dev' | 'staging' | 'prod';
+  environment: Environment;
 }
 
 export class AuthStack extends cdk.Stack {
@@ -12,15 +13,9 @@ export class AuthStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
-
-    const validEnvironments = ['dev', 'staging', 'prod'];
-    if (!validEnvironments.includes(props.environment)) {
-      throw new Error(`Invalid environment "${props.environment}". Must be one of: ${validEnvironments.join(', ')}`);
-    }
-
+    validateEnvironment(props.environment);
     cdk.Tags.of(this).add('Stack', id);
 
-    // User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: `OTJobber-UserPool-${props.environment}`,
       selfSignUpEnabled: true,
@@ -40,7 +35,6 @@ export class AuthStack extends cdk.Stack {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
     });
 
-    // App Client
     this.userPoolClient = this.userPool.addClient('WebClient', {
       userPoolClientName: `OTJobber-WebClient-${props.environment}`,
       generateSecret: false,
@@ -53,7 +47,6 @@ export class AuthStack extends cdk.Stack {
       refreshTokenValidity: cdk.Duration.days(30),
     });
 
-    // Outputs
     new cdk.CfnOutput(this, 'UserPoolId', { value: this.userPool.userPoolId });
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: this.userPoolClient.userPoolClientId });
   }

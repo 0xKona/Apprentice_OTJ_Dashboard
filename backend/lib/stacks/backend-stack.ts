@@ -1,19 +1,15 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { Environment, validateEnvironment } from '../config';
 
 export interface BackendStackProps extends cdk.StackProps {
-  environment: 'dev' | 'staging' | 'prod';
+  environment: Environment;
 }
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
-
-    const validEnvironments = ['dev', 'staging', 'prod'];
-    if (!validEnvironments.includes(props.environment)) {
-      throw new Error(`Invalid environment "${props.environment}". Must be one of: ${validEnvironments.join(', ')}`);
-    }
-
+    validateEnvironment(props.environment);
     cdk.Tags.of(this).add('Stack', id);
   }
 }
