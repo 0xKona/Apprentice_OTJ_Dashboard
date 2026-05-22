@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "sandbox:start": "npx ampx sandbox",
-    "sandbox:delete": "npx ampx sandbox delete"
+    "sandbox:delete": "npx ampx sandbox delete",
+    "backend:deploy": "cd backend && npx cdk deploy --all --context environment=dev"
   },
   "dependencies": {
     "@aws-amplify/adapter-nextjs": "^1.7.1",
