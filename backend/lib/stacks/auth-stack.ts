@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { Construct } from 'constructs';
-import { Environment, validateEnvironment } from '../config';
+import { Environment, validateEnvironment, removalPolicy } from '../config';
 
 export interface AuthStackProps extends cdk.StackProps {
   environment: Environment;
@@ -33,9 +33,7 @@ export class AuthStack extends cdk.Stack {
       },
       mfa: cognito.Mfa.OFF,
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: props.environment === 'prod'
-        ? cdk.RemovalPolicy.RETAIN
-        : cdk.RemovalPolicy.DESTROY,
+      removalPolicy: removalPolicy(props.environment),
     });
 
     this.userPoolClient = this.userPool.addClient('WebClient', {
