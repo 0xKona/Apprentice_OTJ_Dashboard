@@ -33,6 +33,9 @@ export class AuthStack extends cdk.Stack {
       },
       mfa: cognito.Mfa.OFF,
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      removalPolicy: props.environment === 'prod'
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
     });
 
     this.userPoolClient = this.userPool.addClient('WebClient', {
