@@ -29,8 +29,12 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      await signIn({ username: email, password });
-      router.push("/dashboard");
+      const result = await signIn({ username: email, password });
+      if (result.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED") {
+        router.push("/reset-password");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {
