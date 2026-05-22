@@ -2,6 +2,7 @@
   "name": "otjobber_v2",
   "version": "1.0.0",
   "private": true,
+  "workspaces": ["backend"],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
