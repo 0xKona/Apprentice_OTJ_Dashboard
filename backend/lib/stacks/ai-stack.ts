@@ -45,13 +45,32 @@ export class AiStack extends cdk.Stack {
     }));
 
     // DynamoDB permissions for rate limiting
-    props.dataTable.grant(this.generateImprovementFn, 'dynamodb:GetItem', 'dynamodb:UpdateItem', 'dynamodb:PutItem');
+    this.generateImprovementFn.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['dynamodb:GetItem', 'dynamodb:UpdateItem', 'dynamodb:PutItem'],
+      resources: [props.dataTable.tableArn],
+    }));
 
-    // Wire as AppSync resolver
-    const lambdaSource = props.api.addLambdaDataSource('GenerateImprovementSource', this.generateImprovementFn);
-    lambdaSource.createResolver('GenerateImprovement', {
+    // Wire as AppSync resolver — use L1 to avoid cyclic cross-stack dependency
+    const dsRole = new iam.Role(this, 'LambdaDataSourceRole', {
+      assumedBy: new iam.ServicePrincipal('appsync.amazonaws.com'),
+    });
+    this.generateImprovementFn.grantInvoke(dsRole);
+
+    const dataSource = new appsync.CfnDataSource(this, 'GenerateImprovementSource', {
+      apiId: props.api.apiId,
+      name: 'GenerateImprovementSource',
+      type: 'AWS_LAMBDA',
+      lambdaConfig: {
+        lambdaFunctionArn: this.generateImprovementFn.functionArn,
+      },
+      serviceRoleArn: dsRole.roleArn,
+    });
+
+    new appsync.CfnResolver(this, 'GenerateImprovementResolver', {
+      apiId: props.api.apiId,
       typeName: 'Mutation',
       fieldName: 'generateImprovement',
+      dataSourceName: dataSource.attrName,
     });
   }
 }

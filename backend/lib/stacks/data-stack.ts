@@ -36,7 +36,7 @@ export class DataStack extends cdk.Stack {
 
     this.api = new appsync.GraphqlApi(this, 'Api', {
       name: `OTJobber-API-${props.environment}`,
-      schema: appsync.SchemaFile.fromAsset(path.join(__dirname, '../graphql/schema.graphql')),
+      definition: appsync.Definition.fromFile(path.join(__dirname, '../graphql/schema.graphql')),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.USER_POOL,
