@@ -46,5 +46,8 @@ next-env.d.ts
 amplify_outputs*
 amplifyconfiguration*
 
+# CDK
+cdk.out/
+
 # Kiro
 .kiro/specs
