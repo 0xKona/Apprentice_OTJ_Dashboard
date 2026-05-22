@@ -104,7 +104,7 @@ echo "  Header: $CSV_HEADER"
 
 # --- Step 3: Generate CSV ---
 echo "[3/6] Generating CSV file..."
-CSV_FILE=$(mktemp /tmp/cognito-import-XXXXXX.csv)
+CSV_FILE=$(mktemp /tmp/cognito-import-XXXXXXXX.csv)
 echo "$CSV_HEADER" > "$CSV_FILE"
 
 echo "$USERS" | jq -c '.[]' | while read -r user; do
@@ -171,7 +171,7 @@ JOB_RESPONSE=$(aws cognito-idp create-user-import-job \
 JOB_ID=$(echo "$JOB_RESPONSE" | jq -r '.UserImportJob.JobId')
 PRE_SIGNED_URL=$(echo "$JOB_RESPONSE" | jq -r '.UserImportJob.PreSignedUrl')
 
-curl -s -X PUT -T "$CSV_FILE" -H "Content-Type: text/csv" "$PRE_SIGNED_URL"
+curl -s -X PUT -T "$CSV_FILE" -H "Content-Type: text/csv" -H "x-amz-server-side-encryption: aws:kms" "$PRE_SIGNED_URL"
 echo "  CSV uploaded successfully."
 
 # --- Step 6: Start import job ---
