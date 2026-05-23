@@ -4,7 +4,7 @@ import "./globals.css";
 import Auth from "@/components/auth/auth";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
+import { amplifyConfig } from "@/lib/amplify-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description: "Apprentice On-The-Job Training Dashboard",
 };
 
-Amplify.configure(outputs);
+Amplify.configure(amplifyConfig);
 
 export default function RootLayout({
   children,
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -1,12 +1,12 @@
 "use client";
 
 import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
+import { amplifyConfig } from "@/lib/amplify-config";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar/app-sidebar";
 import { Footer } from "@/components/footer";
 
-Amplify.configure(outputs);
+Amplify.configure(amplifyConfig);
 
 export default function DashboardLayout({
   children,

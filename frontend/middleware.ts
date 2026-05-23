@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchAuthSession } from 'aws-amplify/auth/server';
 import { createServerRunner } from '@aws-amplify/adapter-nextjs';
-import outputs from './amplify_outputs.json';
+import { amplifyConfig } from './lib/amplify-config';
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   const { runWithAmplifyServerContext } = createServerRunner({
-    config: outputs,
+    config: amplifyConfig,
   });
 
   const authenticated = await runWithAmplifyServerContext({
