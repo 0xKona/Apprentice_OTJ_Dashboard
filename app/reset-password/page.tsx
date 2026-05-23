@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Password Reset Required</CardTitle>
             <CardDescription>
-              Your password has been reset by an administrator. We&apos;ll send a verification code to your email.
+              Your account has been migrated to a new system and a password reset is required. We&apos;ll send a verification code to your email.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
