@@ -253,7 +253,9 @@ export function TrainingLogForm({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
