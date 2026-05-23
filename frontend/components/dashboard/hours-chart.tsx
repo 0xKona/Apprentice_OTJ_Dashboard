@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -26,25 +26,17 @@ const chartConfig = {
     label: "Hours",
     color: "var(--chart-1)",
   },
-  entries: {
-    label: "Entries",
-    color: "var(--chart-2)",
-  },
 } satisfies ChartConfig;
 
 export function HoursChart({ logs }: HoursChartProps) {
   const chartData = useMemo(() => {
-    const monthlyData = new Map<string, { hours: number; entries: number }>();
+    const monthlyData = new Map<string, number>();
     let earliestDate: Date | null = null;
 
     logs.forEach((log) => {
       const date = new Date(log.date);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      const existing = monthlyData.get(key) || { hours: 0, entries: 0 };
-      monthlyData.set(key, {
-        hours: existing.hours + log.durationHours,
-        entries: existing.entries + 1,
-      });
+      monthlyData.set(key, (monthlyData.get(key) || 0) + log.durationHours);
       if (!earliestDate || date < earliestDate) earliestDate = date;
     });
 
@@ -57,8 +49,7 @@ export function HoursChart({ logs }: HoursChartProps) {
     while (current <= end) {
       const key = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}`;
       const label = current.toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
-      const vals = monthlyData.get(key) || { hours: 0, entries: 0 };
-      data.push({ month: label, hours: parseFloat(vals.hours.toFixed(1)), entries: vals.entries });
+      data.push({ month: label, hours: parseFloat((monthlyData.get(key) || 0).toFixed(1)) });
       current.setMonth(current.getMonth() + 1);
     }
 
@@ -69,11 +60,11 @@ export function HoursChart({ logs }: HoursChartProps) {
     <Card>
       <CardHeader>
         <CardTitle>OTJ Hours Overview</CardTitle>
-        <CardDescription>Hours and entries logged per month</CardDescription>
+        <CardDescription>Hours logged per month</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <AreaChart data={chartData} margin={{ left: 12, right: 12 }}>
+          <BarChart accessibilityLayer data={chartData} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -81,32 +72,9 @@ export function HoursChart({ logs }: HoursChartProps) {
               axisLine={false}
               tickMargin={8}
             />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <defs>
-              <linearGradient id="fillHours" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-hours)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-hours)" stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillEntries" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-entries)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-entries)" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="entries"
-              type="natural"
-              fill="url(#fillEntries)"
-              stroke="var(--color-entries)"
-              stackId="a"
-            />
-            <Area
-              dataKey="hours"
-              type="natural"
-              fill="url(#fillHours)"
-              stroke="var(--color-hours)"
-              stackId="a"
-            />
-          </AreaChart>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Bar dataKey="hours" fill="var(--color-hours)" radius={[4, 4, 0, 0]} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>
