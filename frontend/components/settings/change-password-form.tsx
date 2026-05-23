@@ -56,7 +56,7 @@ export function ChangePasswordForm() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <KeyRound className="h-5 w-5" />
+          <KeyRound className="size-5" />
           Change Password
         </CardTitle>
         <CardDescription>Update your account password</CardDescription>

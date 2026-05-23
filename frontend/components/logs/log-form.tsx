@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AiSuggestionButton } from "@/components/ui/ai-suggestion-button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { AiSuggestionButton } from "@/components/ai/ai-suggestion-button";
 import { AiComparisonDialog } from "@/components/ai/ai-comparison-dialog";
 import { client } from "@/lib/api-client";
 import {
@@ -84,14 +91,7 @@ export function TrainingLogForm({
     }
   }, [aiRateLimitError]);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = useForm<LogFormData>({
+  const form = useForm<LogFormData>({
     resolver: zodResolver(logSchema),
     defaultValues: {
       date: "",
@@ -103,11 +103,11 @@ export function TrainingLogForm({
     },
   });
 
-  const formValues = watch();
+  const formValues = form.watch();
 
   useEffect(() => {
     if (log && open) {
-      reset({
+      form.reset({
         date: log.date,
         startTime: log.startTime,
         endTime: log.endTime,
@@ -116,7 +116,7 @@ export function TrainingLogForm({
         impactOfLearning: log.impactOfLearning,
       });
     } else if (!log && open) {
-      reset({
+      form.reset({
         date: "",
         startTime: "",
         endTime: "",
@@ -125,7 +125,7 @@ export function TrainingLogForm({
         impactOfLearning: "",
       });
     }
-  }, [log, open, reset]);
+  }, [log, open, form]);
 
   const calculateDuration = (start: string, end: string): number => {
     if (!start || !end) return 0;
@@ -188,12 +188,8 @@ export function TrainingLogForm({
 
   const handleAcceptSuggestion = (finalText: string) => {
     if (currentField) {
-      setValue(currentField, finalText);
+      form.setValue(currentField, finalText);
     }
-  };
-
-  const handleRejectSuggestion = () => {
-    // Keep original text
   };
 
   const fieldLabels: Record<keyof LogFormData, string> = {
@@ -229,7 +225,7 @@ export function TrainingLogForm({
         });
       }
 
-      reset();
+      form.reset();
       setOpen(false);
       onSuccess?.();
     } catch (error) {
@@ -240,18 +236,17 @@ export function TrainingLogForm({
   };
 
   const handleClose = () => {
-    reset();
+    form.reset();
     setOpen(false);
   };
 
   const setToday = () => {
-    const today = new Date().toISOString().split("T")[0];
-    setValue("date", today);
+    form.setValue("date", new Date().toISOString().split("T")[0]);
   };
 
   const defaultTrigger = (
     <Button variant="secondary">
-      <Plus className="mr-2 h-4 w-4" />
+      <Plus className="mr-2 size-4" />
       Add Training Log
     </Button>
   );
@@ -271,177 +266,147 @@ export function TrainingLogForm({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="date">Date</Label>
-              {!log && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={setToday}
-                >
-                  <Calendar className="mr-2 h-3 w-3" />
-                  Today
-                </Button>
-              )}
-            </div>
-            <Controller
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
               name="date"
-              control={control}
               render={({ field }) => (
-                <Input
-                  id="date"
-                  type="date"
-                  {...field}
-                  className={errors.date ? "border-red-500" : ""}
-                />
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Date</FormLabel>
+                    {!log && (
+                      <Button type="button" variant="outline" size="sm" onClick={setToday}>
+                        <Calendar className="mr-2 size-3" />
+                        Today
+                      </Button>
+                    )}
+                  </div>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {errors.date && (
-              <p className="text-sm text-red-500">{errors.date.message}</p>
-            )}
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startTime">Start Time</Label>
-              <Controller
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="startTime"
-                control={control}
                 render={({ field }) => (
-                  <Input
-                    id="startTime"
-                    type="time"
-                    {...field}
-                    className={errors.startTime ? "border-red-500" : ""}
-                  />
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-              {errors.startTime && (
-                <p className="text-sm text-red-500">
-                  {errors.startTime.message}
-                </p>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="endTime">End Time</Label>
-              <Controller
+              <FormField
+                control={form.control}
                 name="endTime"
-                control={control}
                 render={({ field }) => (
-                  <Input
-                    id="endTime"
-                    type="time"
-                    {...field}
-                    className={errors.endTime ? "border-red-500" : ""}
-                  />
+                  <FormItem>
+                    <FormLabel>End Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-              {errors.endTime && (
-                <p className="text-sm text-red-500">{errors.endTime.message}</p>
-              )}
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="activity">Activity</Label>
-            <Controller
+            <FormField
+              control={form.control}
               name="activity"
-              control={control}
               render={({ field }) => (
-                <Textarea
-                  id="activity"
-                  placeholder="Describe what you did during this training period..."
-                  {...field}
-                  className={errors.activity ? "border-red-500" : ""}
-                  rows={3}
-                />
+                <FormItem>
+                  <FormLabel>Activity</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe what you did during this training period..."
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {errors.activity && (
-              <p className="text-sm text-red-500">{errors.activity.message}</p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="newLearning">New Learning</Label>
-            <Controller
+            <FormField
+              control={form.control}
               name="newLearning"
-              control={control}
               render={({ field }) => (
-                <Textarea
-                  id="newLearning"
-                  placeholder="What did you learn that you didn't know before?"
-                  {...field}
-                  className={errors.newLearning ? "border-red-500" : ""}
-                  rows={3}
-                />
+                <FormItem>
+                  <FormLabel>New Learning</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="What did you learn that you didn't know before?"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {errors.newLearning && (
-              <p className="text-sm text-red-500">
-                {errors.newLearning.message}
-              </p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="impactOfLearning">Impact of Learning</Label>
-              <div className="flex items-center gap-2">
-                {!rateLimitLoading && (
-                  <span className="text-xs text-muted-foreground">
-                    {remainingUses}/{dailyLimit} AI uses left today
-                  </span>
-                )}
-                <AiSuggestionButton
-                  onClick={() => handleAiImprove("impactOfLearning")}
-                  isLoading={isGenerating}
-                  disabled={
-                    !canUseAi ||
-                    rateLimitLoading ||
-                    (!formValues.activity && !formValues.newLearning)
-                  }
-                />
-              </div>
-            </div>
-            <Controller
+            <FormField
+              control={form.control}
               name="impactOfLearning"
-              control={control}
               render={({ field }) => (
-                <Textarea
-                  id="impactOfLearning"
-                  placeholder="How will this learning impact your work or development?"
-                  {...field}
-                  className={errors.impactOfLearning ? "border-red-500" : ""}
-                  rows={3}
-                />
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Impact of Learning</FormLabel>
+                    <div className="flex items-center gap-2">
+                      {!rateLimitLoading && (
+                        <span className="text-xs text-muted-foreground">
+                          {remainingUses}/{dailyLimit} AI uses left today
+                        </span>
+                      )}
+                      <AiSuggestionButton
+                        onClick={() => handleAiImprove("impactOfLearning")}
+                        isLoading={isGenerating}
+                        disabled={
+                          !canUseAi ||
+                          rateLimitLoading ||
+                          (!formValues.activity && !formValues.newLearning)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Textarea
+                      placeholder="How will this learning impact your work or development?"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {errors.impactOfLearning && (
-              <p className="text-sm text-red-500">
-                {errors.impactOfLearning.message}
-              </p>
-            )}
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : log ? "Save changes" : "Add Log"}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : log ? "Save changes" : "Add Log"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
 
       <AiComparisonDialog
@@ -451,7 +416,7 @@ export function TrainingLogForm({
         originalText={originalText}
         suggestedText={suggestedText}
         onAccept={handleAcceptSuggestion}
-        onReject={handleRejectSuggestion}
+        onReject={() => {}}
       />
     </Dialog>
   );

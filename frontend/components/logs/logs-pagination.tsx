@@ -32,7 +32,7 @@ export function LogsPagination({
           onClick={onPreviousPage}
           disabled={currentPage === 1}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="size-4" />
           Previous
         </Button>
         <Button
@@ -42,7 +42,7 @@ export function LogsPagination({
           disabled={currentPage === totalPages}
         >
           Next
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-4" />
         </Button>
       </div>
     </div>

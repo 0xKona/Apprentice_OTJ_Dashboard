@@ -66,7 +66,7 @@ export function LogsFilters({
             onClick={onClearFilters}
             className="gap-2"
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
             Clear filters
           </Button>
         )}

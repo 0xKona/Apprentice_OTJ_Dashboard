@@ -80,7 +80,7 @@ export default function ProfileCard() {
                 {email || "Loading..."}
               </span>
             </div>
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            <ChevronUp className="size-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
         {/* Card Menu */}
@@ -95,15 +95,15 @@ export default function ProfileCard() {
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem onClick={() => setTheme("light")}>
-                <Sun className="h-4 w-4" />
+                <Sun className="size-4" />
                 <span>Light</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <Moon className="h-4 w-4" />
+                <Moon className="size-4" />
                 <span>Dark</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("system")}>
-                <Monitor className="h-4 w-4" />
+                <Monitor className="size-4" />
                 <span>System</span>
               </DropdownMenuItem>
             </DropdownMenuSubContent>
@@ -116,7 +116,7 @@ export default function ProfileCard() {
             onClick={() => setShowSignOutDialog(true)}
             className="text-destructive focus:text-destructive"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="size-4" />
             <span>Sign Out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -20,7 +20,7 @@ export function AiSuggestionButton({
       onClick={onClick}
       disabled={disabled || isLoading}
     >
-      <Sparkles className="mr-2 h-3 w-3" />
+      <Sparkles className="mr-2 size-3" />
       {isLoading ? "Improving..." : "AI Improve"}
     </Button>
   );

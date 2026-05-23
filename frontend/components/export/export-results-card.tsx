@@ -36,7 +36,7 @@ export function ExportResultsCard({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Download className="h-5 w-5" />
+              <Download className="size-5" />
               Export Results
             </CardTitle>
             <CardDescription>
@@ -46,12 +46,12 @@ export function ExportResultsCard({
           <Button onClick={onCopy} variant="outline">
             {copied ? (
               <>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="size-4 mr-2" />
                 Copied!
               </>
             ) : (
               <>
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="size-4 mr-2" />
                 Copy to Clipboard
               </>
             )}

@@ -72,11 +72,11 @@ export function ExportDataSection() {
       )}
       <div className="flex gap-2">
         <Button onClick={handleCopy} variant="outline" disabled={logs.length === 0}>
-          {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+          {copied ? <Check className="size-4 mr-2" /> : <Copy className="size-4 mr-2" />}
           {copied ? "Copied!" : "Copy to Clipboard"}
         </Button>
         <Button onClick={handleDownload} variant="outline" disabled={logs.length === 0}>
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="size-4 mr-2" />
           Download CSV
         </Button>
       </div>

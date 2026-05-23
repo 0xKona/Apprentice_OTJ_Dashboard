@@ -81,14 +81,14 @@ export function LogsTable({
                     size="icon"
                     onClick={() => onEdit(log)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="size-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => onDelete(log.id, log.date)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               </TableCell>

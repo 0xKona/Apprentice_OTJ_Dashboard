@@ -50,7 +50,7 @@ export function LogReviewStep({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Eye className="h-5 w-5" />
+          <Eye className="size-5" />
           Step 2: Review Parsed Logs
         </CardTitle>
         <CardDescription>
@@ -79,7 +79,7 @@ export function LogReviewStep({
           {parsedFiles.map((file, fileIdx) => (
             <div key={fileIdx} className="space-y-2">
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
+                <FileSpreadsheet className="size-4" />
                 <h4 className="font-semibold">{file.fileName}</h4>
                 {file.status === "error" && (
                   <span className="text-xs text-red-600">
@@ -217,10 +217,10 @@ export function LogReviewStep({
                                   </span>
                                 )}
                                 {log.status === "uploaded" && (
-                                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                  <CheckCircle2 className="size-4 text-green-600" />
                                 )}
                                 {log.status === "error" && (
-                                  <XCircle className="h-4 w-4 text-red-600" />
+                                  <XCircle className="size-4 text-red-600" />
                                 )}
                               </div>
                               <p className="text-sm">{log.activity}</p>
@@ -237,14 +237,14 @@ export function LogReviewStep({
                                   variant="outline"
                                   onClick={() => setEditingLog(log.id)}
                                 >
-                                  <Edit className="h-3 w-3" />
+                                  <Edit className="size-3" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => onDeleteLog(fileIdx, log.id)}
                                 >
-                                  <Trash2 className="h-3 w-3" />
+                                  <Trash2 className="size-3" />
                                 </Button>
                               </div>
                             )}

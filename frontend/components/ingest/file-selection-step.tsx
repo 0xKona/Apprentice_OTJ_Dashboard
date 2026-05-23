@@ -77,7 +77,7 @@ export function FileSelectionStep({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Upload className="h-5 w-5" />
+          <Upload className="size-5" />
           Step 1: Select Excel Files
         </CardTitle>
         <CardDescription>
@@ -160,7 +160,7 @@ export function FileSelectionStep({
                 <Card key={idx}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
-                      <FileSpreadsheet className="h-5 w-5 text-muted-foreground" />
+                      <FileSpreadsheet className="size-5 text-muted-foreground" />
                       <div className="flex-1">
                         <p className="font-medium">{file.name}</p>
                         <p className="text-sm text-muted-foreground">

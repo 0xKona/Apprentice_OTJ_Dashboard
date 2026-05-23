@@ -29,7 +29,7 @@ export function DateRangeFilter({ onFetch, isLoading }: DateRangeFilterProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+          <Calendar className="size-5" />
           Filter by Date Range
         </CardTitle>
         <CardDescription>
