@@ -15,7 +15,7 @@ export function response(ctx) {
   const items = ctx.result.items;
   if (!items || items.length === 0) return null;
   const item = items[0];
-  if (item.userId !== ctx.identity.username) {
+  if (item.userId !== ctx.identity.sub) {
     util.unauthorized();
   }
   return item;

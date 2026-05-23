@@ -3,7 +3,7 @@ import { util } from '@aws-appsync/utils';
 export function request(ctx) {
   const id = util.autoId();
   const { input } = ctx.args;
-  const username = ctx.identity.username;
+  const username = ctx.identity.sub;
   const now = util.time.nowISO8601();
 
   return {

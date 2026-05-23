@@ -60,7 +60,7 @@ def invoke_bedrock(current_content: str, field_name: str, full_context: dict) ->
 
 def lambda_handler(event, context):
     identity = event.get("identity", {})
-    user_id = identity.get("username")
+    user_id = identity.get("sub")
     if not user_id:
         raise Exception("Unauthorized")
 

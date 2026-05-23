@@ -1,7 +1,7 @@
 import { util } from '@aws-appsync/utils';
 
 export function request(ctx) {
-  const username = ctx.identity.username;
+  const username = ctx.identity.sub;
   return {
     operation: 'GetItem',
     key: util.dynamodb.toMapValues({
@@ -14,7 +14,7 @@ export function request(ctx) {
 export function response(ctx) {
   const item = ctx.result;
   if (!item) return null;
-  if (item.userId !== ctx.identity.username) {
+  if (item.userId !== ctx.identity.sub) {
     util.unauthorized();
   }
   return item;
