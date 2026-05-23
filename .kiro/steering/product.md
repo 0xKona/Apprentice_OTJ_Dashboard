@@ -10,12 +10,9 @@ OTJobber is a web application for UK apprentices to manage their On-The-Job (OTJ
 - **Export**: Export filtered training logs (by date range) for submission
 - **Dashboard**: Overview with total hours, average hours, charts, and recent logs
 - **Authentication**: Email-based sign-up/sign-in with Cognito user pools
-- **AI Rate Limiting**: Daily usage caps on AI generation (25/day in production, 1000 in sandbox)
+- **Password Reset**: Migrated users are prompted to set a new password on first login
+- **AI Rate Limiting**: Daily usage caps on AI generation (25/day in production)
 
 ## Target Users
 
 UK apprentices who need to document their on-the-job training hours and activities for their apprenticeship programme.
-
-## Active Migration
-
-The backend is migrating from AWS Amplify Gen 2 to standalone AWS CDK. The CDK backend (`backend/`) is the source of truth for all infrastructure. The Amplify backend (`amplify/`) is deprecated and should not receive new work.
