@@ -1,0 +1,70 @@
+type TrainingLog {
+  id: ID!
+  date: AWSDate!
+  startTime: AWSTime!
+  endTime: AWSTime!
+  durationHours: Float!
+  activity: String!
+  newLearning: String!
+  impactOfLearning: String!
+  userId: String!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type AiUsage {
+  userId: String!
+  date: AWSDate!
+  count: Int!
+  dailyLimit: Int
+  lastUpdated: AWSDateTime!
+}
+
+type TrainingLogConnection {
+  items: [TrainingLog!]!
+  nextToken: String
+}
+
+type AiUsageConnection {
+  items: [AiUsage!]!
+  nextToken: String
+}
+
+input CreateTrainingLogInput {
+  date: AWSDate!
+  startTime: AWSTime!
+  endTime: AWSTime!
+  durationHours: Float!
+  activity: String!
+  newLearning: String!
+  impactOfLearning: String!
+}
+
+input UpdateTrainingLogInput {
+  id: ID!
+  date: AWSDate
+  startTime: AWSTime
+  endTime: AWSTime
+  durationHours: Float
+  activity: String
+  newLearning: String
+  impactOfLearning: String
+}
+
+type Query {
+  getTrainingLog(id: ID!): TrainingLog
+  listTrainingLogs(limit: Int, nextToken: String): TrainingLogConnection!
+  getAiUsage(date: String!): AiUsage
+  listAiUsages(limit: Int, nextToken: String): AiUsageConnection!
+}
+
+type Mutation {
+  createTrainingLog(input: CreateTrainingLogInput!): TrainingLog
+  updateTrainingLog(input: UpdateTrainingLogInput!): TrainingLog
+  deleteTrainingLog(id: ID!): TrainingLog
+  generateImprovement(
+    currentFieldContent: String
+    fieldName: String
+    fullLogContext: AWSJSON
+  ): String
+}

@@ -1,0 +1,10 @@
+node_modules
+dist
+cdk.out
+.cdk.staging
+.next
+out
+coverage
+*.d.ts
+*.js.map
+.env*
