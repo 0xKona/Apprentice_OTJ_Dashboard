@@ -42,7 +42,7 @@ input CreateTrainingLogInput {
 
 input UpdateTrainingLogInput {
   id: ID!
-  date: AWSDate!
+  date: AWSDate
   startTime: AWSTime
   endTime: AWSTime
   durationHours: Float
@@ -61,7 +61,7 @@ type Query {
 type Mutation {
   createTrainingLog(input: CreateTrainingLogInput!): TrainingLog
   updateTrainingLog(input: UpdateTrainingLogInput!): TrainingLog
-  deleteTrainingLog(id: ID!, date: AWSDate!): TrainingLog
+  deleteTrainingLog(id: ID!): TrainingLog
   generateImprovement(
     currentFieldContent: String
     fieldName: String

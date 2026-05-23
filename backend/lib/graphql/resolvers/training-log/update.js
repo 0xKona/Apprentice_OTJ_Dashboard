@@ -9,6 +9,11 @@ export function request(ctx) {
   const expressionValues = { ':updatedAt': now, ':owner': `USER#${username}` };
   const expressionNames = {};
 
+  if (input.date !== undefined) {
+    expressionParts.push('#date = :date');
+    expressionValues[':date'] = input.date;
+    expressionNames['#date'] = 'date';
+  }
   if (input.startTime !== undefined) {
     expressionParts.push('startTime = :startTime');
     expressionValues[':startTime'] = input.startTime;
@@ -38,7 +43,7 @@ export function request(ctx) {
     operation: 'UpdateItem',
     key: util.dynamodb.toMapValues({
       PK: `USER#${username}`,
-      SK: `LOG#${input.date}#${input.id}`,
+      SK: `LOG#${input.id}`,
     }),
     update: {
       expression: `SET ${expressionParts.join(', ')}`,

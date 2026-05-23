@@ -6,7 +6,7 @@ export function request(ctx) {
     operation: 'DeleteItem',
     key: util.dynamodb.toMapValues({
       PK: `USER#${username}`,
-      SK: `LOG#${ctx.args.date}#${ctx.args.id}`,
+      SK: `LOG#${ctx.args.id}`,
     }),
     condition: {
       expression: 'PK = :owner',

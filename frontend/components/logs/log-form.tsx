@@ -214,22 +214,10 @@ export function TrainingLogForm({
       }
 
       if (log?.id) {
-        if (data.date !== log.date) {
-          // Date changed — delete old item and create new one (SK includes date)
-          await client.graphql({
-            query: (await import("@/lib/graphql/mutations")).deleteTrainingLog,
-            variables: { id: log.id, date: log.date },
-          });
-          await client.graphql({
-            query: createTrainingLog,
-            variables: { input: { ...data, durationHours } },
-          });
-        } else {
-          await client.graphql({
-            query: updateTrainingLog,
-            variables: { input: { id: log.id, ...data, date: log.date, durationHours } },
-          });
-        }
+        await client.graphql({
+          query: updateTrainingLog,
+          variables: { input: { id: log.id, ...data, durationHours } },
+        });
       } else {
         await client.graphql({
           query: createTrainingLog,

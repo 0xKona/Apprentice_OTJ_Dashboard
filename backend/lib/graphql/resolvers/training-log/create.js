@@ -10,7 +10,7 @@ export function request(ctx) {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({
       PK: `USER#${username}`,
-      SK: `LOG#${input.date}#${id}`,
+      SK: `LOG#${id}`,
     }),
     attributeValues: util.dynamodb.toMapValues({
       id,

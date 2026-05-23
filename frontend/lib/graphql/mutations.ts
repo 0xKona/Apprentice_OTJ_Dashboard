@@ -35,8 +35,8 @@ export const updateTrainingLog = /* GraphQL */ `
 `;
 
 export const deleteTrainingLog = /* GraphQL */ `
-  mutation DeleteTrainingLog($id: ID!, $date: AWSDate!) {
-    deleteTrainingLog(id: $id, date: $date) {
+  mutation DeleteTrainingLog($id: ID!) {
+    deleteTrainingLog(id: $id) {
       id
       date
     }

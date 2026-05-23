@@ -15,7 +15,7 @@ interface TrainingLogsState {
   fetchLogs: () => Promise<void>;
   createLog: (log: Omit<TrainingLog, "id" | "createdAt" | "updatedAt" | "userId">) => Promise<void>;
   updateLog: (id: string, updates: Partial<TrainingLog>) => Promise<void>;
-  deleteLog: (id: string, date: string) => Promise<void>;
+  deleteLog: (id: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -97,12 +97,12 @@ export const useTrainingLogsStore = create<TrainingLogsState>((set) => ({
     }
   },
 
-  deleteLog: async (id, date) => {
+  deleteLog: async (id) => {
     set({ isLoading: true, error: null });
     try {
       await client.graphql({
         query: deleteTrainingLog,
-        variables: { id, date },
+        variables: { id },
       });
 
       set((state) => ({
