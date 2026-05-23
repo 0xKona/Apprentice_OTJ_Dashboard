@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Re-keys migrated training log items from old Cognito subs to new pool subs.
-
 REGION="eu-west-2"
-TABLE="OTJobber-Data-dev"
+TABLE="OTJobber-Data-prod"
 
 OLD_SUBS=("06a2a264-80d1-706c-cba5-c95540539816" "d66222b4-1091-700b-e700-8eb39f2fec0b")
-NEW_SUBS=("d6d262d4-50d1-70ee-cc6a-88f5eae414b4" "e6526274-d021-70a8-dcce-47cce657ed26")
+NEW_SUBS=("66a2c2e4-50b1-7034-601f-1650b2cf2b84" "365262b4-a001-70f2-ecb5-d042cc8ef0b2")
 
 FIXED=0
 ERRORS=0
