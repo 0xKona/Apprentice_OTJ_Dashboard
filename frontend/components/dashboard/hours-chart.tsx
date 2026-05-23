@@ -31,26 +31,30 @@ const chartConfig = {
 export function HoursChart({ logs }: HoursChartProps) {
   const chartData = useMemo(() => {
     const monthlyData = new Map<string, number>();
-    let earliestDate: Date | null = null;
+    let earliestDate: string | null = null;
 
     logs.forEach((log) => {
-      const date = new Date(log.date);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const [year, month] = log.date.split("-");
+      const key = `${year}-${month}`;
       monthlyData.set(key, (monthlyData.get(key) || 0) + log.durationHours);
-      if (!earliestDate || date < earliestDate) earliestDate = date;
+      if (!earliestDate || log.date < earliestDate) earliestDate = log.date;
     });
 
     const now = new Date();
-    const start = earliestDate || new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const startKey = earliestDate || `${now.getFullYear()}-${String(now.getMonth()).padStart(2, "0")}`;
+    const [startYear, startMonth] = startKey.split("-").map(Number);
     const data = [];
-    const current = new Date(start.getFullYear(), start.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth(), 1);
+    let year = startYear;
+    let month = startMonth;
+    const endYear = now.getFullYear();
+    const endMonth = now.getMonth() + 1;
 
-    while (current <= end) {
-      const key = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}`;
-      const label = current.toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
+    while (year < endYear || (year === endYear && month <= endMonth)) {
+      const key = `${year}-${String(month).padStart(2, "0")}`;
+      const label = new Date(year, month - 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
       data.push({ month: label, hours: parseFloat((monthlyData.get(key) || 0).toFixed(1)) });
-      current.setMonth(current.getMonth() + 1);
+      month++;
+      if (month > 12) { month = 1; year++; }
     }
 
     return data;
