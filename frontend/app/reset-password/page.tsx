@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   confirmSignIn,
@@ -27,6 +27,14 @@ const PASSWORD_RULES = [
 ];
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const flow = searchParams.get("flow") || "new-password";
   const username = searchParams.get("username") || "";
