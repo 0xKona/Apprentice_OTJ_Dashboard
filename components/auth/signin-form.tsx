@@ -31,10 +31,14 @@ export default function SignInForm() {
     try {
       const result = await signIn({ username: email, password });
       if (result.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED") {
-        router.push("/reset-password");
-      } else {
-        router.push("/dashboard");
+        router.push("/reset-password?flow=new-password");
+        return;
       }
+      if (result.nextStep?.signInStep === "RESET_PASSWORD") {
+        router.push(`/reset-password?flow=reset&username=${encodeURIComponent(email)}`);
+        return;
+      }
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {
