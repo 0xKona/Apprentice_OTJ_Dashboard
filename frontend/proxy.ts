@@ -3,7 +3,7 @@ import { fetchAuthSession } from 'aws-amplify/auth/server';
 import { createServerRunner } from '@aws-amplify/adapter-nextjs';
 import { amplifyConfig } from './lib/amplify-config';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   const { runWithAmplifyServerContext } = createServerRunner({
@@ -26,12 +26,10 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname === '/signin' || pathname === '/signup';
   const isDashboard = pathname.startsWith('/dashboard');
 
-  // Redirect authenticated users away from auth pages
   if (authenticated && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Redirect unauthenticated users to signin
   if (!authenticated && isDashboard) {
     return NextResponse.redirect(
       new URL(`/signin?redirect=${encodeURIComponent(pathname)}`, request.url)

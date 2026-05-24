@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { AuthStack } from '../lib/stacks/auth-stack';
 import { DataStack } from '../lib/stacks/data-stack';
 import { AiStack } from '../lib/stacks/ai-stack';
+import { HostingStack } from '../lib/stacks/hosting-stack';
 import { validateEnvironment } from '../lib/config';
 
 const app = new cdk.App();
@@ -29,6 +30,14 @@ new AiStack(app, `OTJobber-Ai-${environment}`, {
   environment,
   api: dataStack.api,
   dataTable: dataStack.dataTable,
+});
+
+new HostingStack(app, `OTJobber-Hosting-${environment}`, {
+  env,
+  environment,
+  userPoolId: authStack.userPool.userPoolId,
+  userPoolClientId: authStack.userPoolClient.userPoolClientId,
+  apiUrl: dataStack.api.graphqlUrl,
 });
 
 cdk.Tags.of(app).add('Application', 'OTJobber');
